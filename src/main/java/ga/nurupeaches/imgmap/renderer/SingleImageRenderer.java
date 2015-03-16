@@ -12,10 +12,12 @@ public class SingleImageRenderer extends MapRenderer {
 
     private boolean hasDrawn = false;
     private Disposable<Image> disposableImage;
+	private String source;
 
-    public SingleImageRenderer(Image image){
+    public SingleImageRenderer(String source, Image image){
         disposableImage = new Disposable<Image>(image);
-    }
+    	this.source = source;
+	}
 
     @Override
     public void render(MapView view, MapCanvas canvas, Player player) {
@@ -24,6 +26,10 @@ public class SingleImageRenderer extends MapRenderer {
             canvas.drawImage(0, 0, disposableImage.get());
         }
     }
+
+	public String sauce(){
+		return source;
+	}
 
     private class Disposable<T> {
 

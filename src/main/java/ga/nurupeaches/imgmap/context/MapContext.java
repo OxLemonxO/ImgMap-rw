@@ -1,43 +1,70 @@
 package ga.nurupeaches.imgmap.context;
 
+import ga.nurupeaches.imgmap.ImgMapPlugin;
+import ga.nurupeaches.imgmap.renderer.SingleImageRenderer;
+import ga.nurupeaches.imgmap.utils.IOHelper;
+import ga.nurupeaches.imgmap.utils.MapUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
-import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
 
-public class MapContext {
+public class MapContext extends Context {
 
-    private static final Map<Short, MapContext> CONTEXT_LOOKUP = new HashMap<Short, MapContext>();
-    private Map<UUID, String> history = new HashMap<UUID, String>();
-    private final short id;
+    private short id;
 
-    private MapContext(short id){
-        this.id = id;
-    }
+	public MapContext(short id){
+		this.id = id;
+	}
 
-    public void updateContent(Player player, Image image){
-        MapView view = Bukkit.getMap(id);
+    public MapContext(){}
 
+	public short getId(){
+		return id;
+	}
 
-    }
+	@Override
+    public void updateContent(Notifiable notifiable, String source, BufferedImage image){
+		MapView view = Bukkit.getMap(id);
+		MapUtils.clearRenderers(view);
 
-    public static MapContext getContext(short id){
-        synchronized (CONTEXT_LOOKUP) {
-            MapContext context = CONTEXT_LOOKUP.get(id);
+		view.addRenderer(new SingleImageRenderer(source, IOHelper.resizeImage(image)));
+		history.add(source);
+	}
 
-            if (context == null) {
-                context = new MapContext(id);
-                CONTEXT_LOOKUP.put(id, context);
-            }
+	@Override
+	public void update(){
+		MapView view = Bukkit.getMap(id);
+		for(Player player : Bukkit.getOnlinePlayers()){
+			player.sendMap(view);
+		}
+	}
 
-            return context;
-        }
-    }
+	@Override
+	public void write(DataOutputStream stream) throws IOException {
+		byte[] sourceBytes = getImageSource().getBytes(ImgMapPlugin.IO_CHARSET);
 
+		stream.writeShort(id);
+		stream.writeInt(sourceBytes.length);
+		stream.write(sourceBytes);
+	}
+
+	@Override
+	public void read(DataInputStream stream) throws IOException {
+		id = stream.readShort();
+
+		byte[] source = new byte[stream.readInt()];
+		if(stream.read(source) != source.length){
+			ImgMapPlugin.logger().log(Level.WARNING, "Non-matching bytes read to bytes expected!");
+		}
+
+		history.add(new String(source, ImgMapPlugin.IO_CHARSET));
+	}
 
 
 }

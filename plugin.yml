@@ -1,0 +1,6 @@
+name: ImgMap
+version: 0-rw
+main: ga.nurupeaches.imgmap.ImgMapPlugin
+
+commands:
+    drawimage:

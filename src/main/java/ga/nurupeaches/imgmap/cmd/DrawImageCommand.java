@@ -1,60 +1,88 @@
 package ga.nurupeaches.imgmap.cmd;
 
+import ga.nurupeaches.imgmap.context.Context;
 import ga.nurupeaches.imgmap.context.MapContext;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
+import ga.nurupeaches.imgmap.context.MultiMapContext;
+import ga.nurupeaches.imgmap.utils.IOHelper;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.map.MapView;
+import org.bukkit.inventory.ItemStack;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-import java.util.Map;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
+public class DrawImageCommand extends CommandHandler {
 
-public class DrawImageCommand implements CommandExecutor {
+	public DrawImageCommand(){
+		super(1, true, "imgmap.command.drawimage", "/drawimage <url>");
+	}
 
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] arguments){
-        if(arguments.length > 0){
-            return false;
-        }
+	@Override
+	public void executeCommand(CommandSender sender, String[] arguments){
+		final Player player = (Player)sender; // Safe to cast since we check if they're non-player earlier.
+		ItemStack stack = player.getItemInHand();
+		if(stack == null || (stack.getType() != Material.MAP)){
+			commandFailure(sender, "You must be holding a map to use this command!");
+			return;
+		}
 
-        if(!(sender instanceof Player)){
-            sender.sendMessage(ChatColor.RED + "You need to be a player to use this command.");
-            return true;
-        }
+		BufferedImage image;
 
-        Player player = (Player)sender;
-        MapContext context = MapContext.getContext(player.getItemInHand().getDurability());
-        context.updateContent(player, new Image() {
-            @Override
-            public int getWidth(ImageObserver observer) {
-                return 0;
-            }
+		try {
+			image = IOHelper.fetchImage(new URL(arguments[0]));
+		} catch (IOException e){
+			commandFailure(sender, "Failed to retrieve image!");
+			e.printStackTrace();
+			return;
+		}
 
-            @Override
-            public int getHeight(ImageObserver observer) {
-                return 0;
-            }
+		Context context = Context.getContext(stack.getDurability());
+		if(arguments.length >= 4 && arguments[1].equalsIgnoreCase("-mm")){
+			commandWarning(sender, "Multi-map mode is being used!");
+			int xSize, ySize;
 
-            @Override
-            public ImageProducer getSource() {
-                return null;
-            }
+			try{
+				xSize = Integer.parseInt(arguments[2]);
+				ySize = Integer.parseInt(arguments[3]);
+			} catch (NumberFormatException e){
+				commandFailure(sender, "The given dimensions for canvas were not valid.");
+				return;
+			}
 
-            @Override
-            public Graphics getGraphics() {
-                return null;
-            }
+			List<Short> toUse = new LinkedList<Short>();
+			for(int i=0; i < xSize * ySize; i++){
+				toUse.add((short)(i + stack.getDurability()));
+			}
+			sender.sendMessage("using ids " + toUse.toString());
 
-            @Override
-            public Object getProperty(String name, ImageObserver observer) {
-                return null;
-            }
-        });
-    }
+			if(context == null){
+				context = new MultiMapContext(Context._conv(toUse), xSize, ySize);
+			}
+
+			if(context instanceof MultiMapContext){
+				((MultiMapContext)context).updateSizes(xSize, ySize);
+				((MultiMapContext)context).updateIds(Context._conv(toUse));
+			}
+		} else {
+			if(context == null){
+				context = new MapContext(stack.getDurability());
+			}
+		}
+
+		context.updateContent(new Context.Notifiable() {
+			@Override
+			public void sendMessage(String message) {
+				player.sendMessage(message);
+			}
+		}, arguments[0], image);
+
+		context.update(); // Update the map for everyone now.
+		Context.registerContext(context);
+		commandSuccess(sender, "Drawing " + arguments[0] + "...");
+	}
 
 }
