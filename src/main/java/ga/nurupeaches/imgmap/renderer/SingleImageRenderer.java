@@ -5,17 +5,16 @@ import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
-import java.awt.*;
-import java.lang.ref.SoftReference;
+import java.awt.image.BufferedImage;
 
 public class SingleImageRenderer extends MapRenderer {
 
     private boolean hasDrawn = false;
-    private Disposable<Image> disposableImage;
+    private BufferedImage image;
 	private String source;
 
-    public SingleImageRenderer(String source, Image image){
-        disposableImage = new Disposable<Image>(image);
+    public SingleImageRenderer(String source, BufferedImage image){
+        this.image = image;
     	this.source = source;
 	}
 
@@ -23,7 +22,7 @@ public class SingleImageRenderer extends MapRenderer {
     public void render(MapView view, MapCanvas canvas, Player player) {
         if(!hasDrawn){
             hasDrawn = true;
-            canvas.drawImage(0, 0, disposableImage.get());
+            canvas.drawImage(0, 0, image);
         }
     }
 
@@ -31,26 +30,8 @@ public class SingleImageRenderer extends MapRenderer {
 		return source;
 	}
 
-    private class Disposable<T> {
-
-        private Object object;
-        private boolean isDisposable = false;
-
-        public Disposable(T object){
-            this.object = object;
-        }
-
-        public T get(){
-            if(isDisposable && object instanceof SoftReference){
-                return (T)((SoftReference)object).get();
-            } else {
-                T old = (T)object;
-                object = new SoftReference<T>(old);
-                isDisposable = true;
-                return old;
-            }
-        }
-
-    }
+	public BufferedImage getImage(){
+		return image;
+	}
 
 }

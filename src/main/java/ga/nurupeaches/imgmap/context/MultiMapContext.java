@@ -8,12 +8,14 @@ import ga.nurupeaches.imgmap.utils.MapUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 
 public class MultiMapContext extends Context {
@@ -81,10 +83,18 @@ public class MultiMapContext extends Context {
 
 	@Override
 	public void update(){
+		List<MapRenderer> renderers;
+		MapRenderer first;
+
 		for(short id : ids){
-			MapView view = Bukkit.getMap(id);
-			for(Player player : Bukkit.getOnlinePlayers()){
-				player.sendMap(view);
+			renderers = Bukkit.getMap(id).getRenderers();
+			first = renderers.get(0);
+			if(renderers.size() > 0 && first instanceof SingleImageRenderer){
+				for(Player player : Bukkit.getOnlinePlayers()){
+					// Rapid calls to Player.sendMap(MapView) stalls the server trying to buffer RenderData.
+					// This, right here, bypasses all of that and immediately ships data off to the client.
+					Adapter.convertImageToPackets(id, ((SingleImageRenderer)first).getImage()).send(player);
+				}
 			}
 		}
 	}

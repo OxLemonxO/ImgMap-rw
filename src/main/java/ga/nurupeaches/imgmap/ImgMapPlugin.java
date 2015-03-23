@@ -1,6 +1,7 @@
 package ga.nurupeaches.imgmap;
 
 import ga.nurupeaches.imgmap.cmd.DrawImageCommand;
+import ga.nurupeaches.imgmap.cmd.ImgMap_LicensesCommand;
 import ga.nurupeaches.imgmap.context.Context;
 import ga.nurupeaches.imgmap.context.MapContext;
 import ga.nurupeaches.imgmap.context.MultiMapContext;
@@ -23,7 +24,10 @@ public class ImgMapPlugin extends JavaPlugin {
     public void onEnable(){
         SINGLETON = this;
 		getCommand("drawimage").setExecutor(new DrawImageCommand());
+		getCommand("imgmap-licenses").setExecutor(new ImgMap_LicensesCommand());
 		loadContexts();
+
+		System.load(new File(getDataFolder(), "NativeVideoImpl.so").getAbsolutePath());
     }
 
     @Override

@@ -4,3 +4,4 @@ main: ga.nurupeaches.imgmap.ImgMapPlugin
 
 commands:
     drawimage:
+    imgmap-licenses:

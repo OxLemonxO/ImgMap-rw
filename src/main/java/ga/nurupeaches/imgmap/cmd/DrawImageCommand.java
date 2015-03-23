@@ -79,7 +79,6 @@ public class DrawImageCommand extends CommandHandler {
 				player.sendMessage(message);
 			}
 		}, arguments[0], image);
-
 		context.update(); // Update the map for everyone now.
 		Context.registerContext(context);
 		commandSuccess(sender, "Drawing " + arguments[0] + "...");
