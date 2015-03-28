@@ -17,6 +17,14 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read
 
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    getSource
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getSource
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    newNativeVideo
  * Signature: (Ljava/lang/String;)J
  */

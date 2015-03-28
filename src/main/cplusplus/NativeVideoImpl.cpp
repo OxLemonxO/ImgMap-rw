@@ -1,7 +1,9 @@
 #include "NativeVideoImpl.h"
 
-NativeVideoImpl::NativeVideoImpl(){}
+NativeVideoImpl::NativeVideoImpl(string src){
+	videoSource = src;
+}
 
 int** NativeVideoImpl::fetchNextFrame(){
-	return NULL;
+	return 0;
 }
