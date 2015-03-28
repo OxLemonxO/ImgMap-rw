@@ -1,5 +1,6 @@
 #include "ga_nurupeaches_imgmap_natives_NativeVideo.h"
-#include "NativeVideoImpl.h"
+#include "NativeVideoImpl.cpp" // Note to self: include .cpp's, not .h's.
+
 #ifdef __cplusplus
 extern "C" {
 #endif

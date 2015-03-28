@@ -11,6 +11,7 @@ public class NativeVideo {
 
 	public NativeVideo(File file){
 		pointer = newNativeVideo(file.getAbsolutePath());
+		System.out.println(pointer);
 	}
 
 }
