@@ -1,4 +1,4 @@
-CXX = g++ -fPIC
+CXX = g++ -fPIC -pedantic
 CXXFLAGS = -Wall -g
 
 libNativeVideo.so : NativeVideoImpl.o ga_nurupeaches_imgmap_natives_NativeVideo.o

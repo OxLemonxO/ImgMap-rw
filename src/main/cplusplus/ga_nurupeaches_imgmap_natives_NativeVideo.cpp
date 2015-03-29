@@ -23,6 +23,11 @@ void doCallback(JNIEnv* env, jobject callback, jintArray arg){
 extern "C" {
 
 	JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEnv *env, jobject thisObject, jlong pointer, jobject callback){
+		NativeVideoImpl* impl = (NativeVideoImpl*)pointer;
+		if(!impl->isOpen()){
+			impl->open();
+		}
+
 		doCallback(env, callback, env->NewIntArray(5));
 	}
 
