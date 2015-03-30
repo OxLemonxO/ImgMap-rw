@@ -19,6 +19,7 @@ public class NativeVideo {
 	}
 
 	public void read(){
+		System.out.println("read");
 		read(pointer, this, handler);
 	}
 

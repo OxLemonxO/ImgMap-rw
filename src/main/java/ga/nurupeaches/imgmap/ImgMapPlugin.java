@@ -4,13 +4,17 @@ import ga.nurupeaches.imgmap.cmd.DrawImageCommand;
 import ga.nurupeaches.imgmap.context.Context;
 import ga.nurupeaches.imgmap.context.MapContext;
 import ga.nurupeaches.imgmap.context.MultiMapContext;
+import ga.nurupeaches.imgmap.context.SimpleAnimatedMapContext;
 import ga.nurupeaches.imgmap.utils.IOHelper;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,13 +29,18 @@ public class ImgMapPlugin extends JavaPlugin {
 		getCommand("drawimage").setExecutor(new DrawImageCommand());
 		loadContexts();
 
-		System.load(new File(getDataFolder(), "NativeVideoImpl.so").getAbsolutePath());
+		System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
     }
 
     @Override
     public void onDisable(){
         SINGLETON = null;
 		saveContexts();
+		try{
+			unloadJNI();
+		} catch (Exception e){
+			logger().log(Level.SEVERE, "Failed to unload native JNI library!", e);
+		}
     }
 
 	public void loadContexts(){
@@ -107,6 +116,8 @@ public class ImgMapPlugin extends JavaPlugin {
 					id = 0x01;
 				} else if(context instanceof MultiMapContext){
 					id = 0x02;
+				} else if(context instanceof SimpleAnimatedMapContext){
+					((SimpleAnimatedMapContext)context).stopThreads(); // Don't write it.
 				}
 
 				if(id != 0x7F){
@@ -141,6 +152,19 @@ public class ImgMapPlugin extends JavaPlugin {
 	public static Logger logger(){
 		synchronized(ImgMapPlugin.class){
 			return SINGLETON.getLogger();
+		}
+	}
+
+
+	public void unloadJNI() throws Exception {
+		Field field = ClassLoader.class.getDeclaredField("nativeLibraries");
+		field.setAccessible(true);
+		Vector libs = (Vector)field.get(this.getClassLoader());
+		Method finalizeMethod;
+		for (Object o : libs) {
+			finalizeMethod = o.getClass().getDeclaredMethod("finalize", new Class[0]);
+			finalizeMethod.setAccessible(true);
+			finalizeMethod.invoke(o, new Object[0]);
 		}
 	}
 

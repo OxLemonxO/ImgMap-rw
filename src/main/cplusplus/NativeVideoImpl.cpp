@@ -89,7 +89,8 @@ AVFrame* NativeVideoImpl::fetchNextFrame(){
 		}
 	}
 
-	return 0;
+	close();
+	return frameRGB;
 }
 
 void NativeVideoImpl::close(){

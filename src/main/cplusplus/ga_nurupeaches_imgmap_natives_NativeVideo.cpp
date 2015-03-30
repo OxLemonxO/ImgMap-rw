@@ -10,7 +10,7 @@ string jstrToStr(JNIEnv* env, jstring jstr){
 	return cppStr;
 }
 
-jstring strToJString(JNIEnv* env, string str){
+inline jstring strToJString(JNIEnv* env, string str){
 	return env->NewStringUTF(str.c_str());
 }
 
@@ -42,7 +42,7 @@ extern "C" {
 		}
 
 		jbyteArray arr = env->NewByteArray(javaBytes.size());
-		env->SetByteArrayRegion(arr, 0, javaBytes.size(), reinterpret_cast<jbyte*>(&javaBytes[0]));
+		env->SetByteArrayRegion(arr, 0, javaBytes.size(), javaBytes.data());
 		doCallback(env, callback, javaNV, arr);
 	}
 

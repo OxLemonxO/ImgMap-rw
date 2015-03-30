@@ -5,6 +5,7 @@ import ga.nurupeaches.imgmap.context.MapContext;
 import ga.nurupeaches.imgmap.context.MultiMapContext;
 import ga.nurupeaches.imgmap.context.SimpleAnimatedMapContext;
 import ga.nurupeaches.imgmap.utils.IOHelper;
+import ga.nurupeaches.imgmap.utils.YTRegexHelper;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -31,8 +32,8 @@ public class DrawImageCommand extends CommandHandler {
 			return;
 		}
 
-		BufferedImage image;
-
+		BufferedImage image = null;
+		if(!arguments[1].equals("-vid"))
 		try {
 			image = IOHelper.fetchImage(new URL(arguments[0]));
 		} catch (IOException e){
@@ -40,6 +41,7 @@ public class DrawImageCommand extends CommandHandler {
 			e.printStackTrace();
 			return;
 		}
+
 
 		Context context = Context.getContext(stack.getDurability());
 		if(arguments.length >= 4 && arguments[1].equalsIgnoreCase("-mm")){
@@ -68,8 +70,8 @@ public class DrawImageCommand extends CommandHandler {
 				((MultiMapContext)context).updateSizes(xSize, ySize);
 				((MultiMapContext)context).updateIds(Context._conv(toUse));
 			}
-		} else if(arguments[0].endsWith(".mp4")){
-			context = new SimpleAnimatedMapContext(arguments[0], stack.getDurability());
+		} else if(arguments[1].equalsIgnoreCase("-vid")){
+			context = new SimpleAnimatedMapContext(YTRegexHelper.getDirectLinks(arguments[0]).get(0), stack.getDurability());
 			((SimpleAnimatedMapContext)context).addViewer(player.getUniqueId());
 			((SimpleAnimatedMapContext)context).startThreads();
 		} else {

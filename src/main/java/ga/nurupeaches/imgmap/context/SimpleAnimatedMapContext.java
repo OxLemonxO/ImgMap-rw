@@ -4,19 +4,19 @@ import ga.nurupeaches.imgmap.ImgMapPlugin;
 import ga.nurupeaches.imgmap.natives.NativeVideo;
 import ga.nurupeaches.imgmap.nms.Adapter;
 import ga.nurupeaches.imgmap.nms.MapPacket;
-import ga.nurupeaches.imgmap.renderer.SingleImageRenderer;
+import ga.nurupeaches.imgmap.renderer.EmptyRenderer;
 import ga.nurupeaches.imgmap.utils.IOHelper;
 import ga.nurupeaches.imgmap.utils.MapUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -27,21 +27,37 @@ public class SimpleAnimatedMapContext extends MassUpdateContext {
 	private BufferedImage image;
 	private NativeVideo video;
 	private List<UUID> viewers = new ArrayList<UUID>();
+	private Thread nativeThread;
 	private boolean streaming = false;
+	private short id;
+
+	// ==== PURELY FOR DEBUGGING PURPOSES - REMOVE WHEN DONE ====
+	private JFrame frame = new JFrame("ImgMapDbg");
+	// ==== PURELY FOR DEBUGGING PURPOSES - REMOVE WHEN DONE ====
+
 
 	public SimpleAnimatedMapContext(String videoSource, short id){
+		this.id = id;
 		view = Bukkit.getMap(id);
 		video = new NativeVideo(this, videoSource);
+
+		// ==== PURELY FOR DEBUGGING PURPOSES - REMOVE WHEN DONE ====
+		frame.getContentPane().setLayout(new FlowLayout());
+		frame.getContentPane().add(new JLabel(new ImageIcon()));
+		frame.pack();
+		frame.setVisible(true);
+		// ==== PURELY FOR DEBUGGING PURPOSES - REMOVE WHEN DONE ====
 	}
 
 	public void addViewer(UUID uuid){
 		viewers.add(uuid);
 	}
 
+	// ugly.
 	public void startThreads(){
 		streaming = true;
 
-		Thread nativeThread = new Thread(new Runnable() {
+		nativeThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while(streaming){
@@ -55,57 +71,35 @@ public class SimpleAnimatedMapContext extends MassUpdateContext {
 			}
 		});
 
-		Thread uiThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(streaming){
-					SimpleAnimatedMapContext.this.update();
-					try{
-						Thread.sleep(50);
-					} catch (InterruptedException e){
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-
 		nativeThread.start();
-		uiThread.start();
+	}
+
+	public void stopThreads(){
+		nativeThread.stop();
 	}
 
 	@Override
 	public void updateContent(Notifiable notifiable, String source, BufferedImage image){
 		MapUtils.clearRenderers(view);
-
-		view.addRenderer(new SingleImageRenderer(source, IOHelper.resizeImage(image)));
+		view.addRenderer(new EmptyRenderer());
 		history.add(source);
 	}
 
 	@Override
-	public void update(){
-		if(image == null){
-			return;
-		}
-
-		Iterator<UUID> iter = viewers.iterator();
-		UUID uuid;
-		Player player;
-		image = IOHelper.resizeImage(image, 128, 128);
-		MapPacket packet = Adapter.convertImageToPackets(view.getId(), image);
-		while(iter.hasNext()){
-			uuid = iter.next();
-			if((player = Bukkit.getPlayer(uuid)) == null){
-				iter.remove();
-				continue;
-			}
-
-			packet.send(player);
-		}
-	}
+	public void update(){}
 
 	@Override
 	public void massUpdate(Object... objs){
-		image = (BufferedImage)objs[0];
+		image = IOHelper.resizeImage((BufferedImage)objs[0], 128, 128);
+		MapPacket packet = Adapter.convertImageToPackets(id, image);
+		for(UUID uuid : viewers){
+			packet.send(Bukkit.getPlayer(uuid));
+		}
+
+		// ==== PURELY FOR DEBUGGING PURPOSES - REMOVE WHEN DONE ====
+		frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+		frame.getContentPane().invalidate();
+		// ==== PURELY FOR DEBUGGING PURPOSES - REMOVE WHEN DONE ====
 	}
 
 	@Override
