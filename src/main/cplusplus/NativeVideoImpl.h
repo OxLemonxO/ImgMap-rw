@@ -3,9 +3,13 @@
 #define BUFFER_SIZE 2048
 
 #include <string>
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
+#include <jni.h>
+
+extern "C" {
+	#include "libavcodec/avcodec.h"
+	#include "libavformat/avformat.h"
+	#include "libswscale/swscale.h"
+}
 
 using std::string;
 
@@ -33,12 +37,15 @@ class NativeVideoImpl {
 
 	public:
 		NativeVideoImpl (string src);
-		int** fetchNextFrame();
+		AVFrame* fetchNextFrame();
 		string getSource(){ return videoSource; }
 		void fillRGBData(uint8_t* data);
 		int open();
 		bool isOpen();
 		void close();
+
+		int getHeight();
+		int getWidth();
 
 };
 #endif

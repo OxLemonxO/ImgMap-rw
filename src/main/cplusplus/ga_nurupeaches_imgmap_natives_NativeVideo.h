@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    read
- * Signature: (JLga/nurupeaches/imgmap/natives/NativeCallbackHandler;)V
+ * Signature: (JLjava/lang/Object;)V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read
-  (JNIEnv *, jobject, jlong, jobject);
+  (JNIEnv *, jobject, jlong, jobject, jobject);
 
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
@@ -30,6 +30,22 @@ JNIEXPORT jstring JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getSour
  */
 JNIEXPORT jlong JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_newNativeVideo
   (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    getWidth
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getWidth
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    getHeight
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getHeight
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }

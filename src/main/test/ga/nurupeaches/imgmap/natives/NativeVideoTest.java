@@ -6,12 +6,16 @@ public class NativeVideoTest {
 		// Debugging purposes.
 		System.load("/home/tsunko/Gunvarrel/ImgMap-rw/src/main/cplusplus/libNativeVideo.so");
 
-		String videoPath = "/home/tsunko/Videos/[DeadFish] Saenai Heroine no Sodatekata - 09 [720p][AAC].mp4";
+		String videoPath = "/home/tsunko/Videos/NichijouNativeVideo.mp4";
 		NativeVideo video = new NativeVideo(videoPath);
 
 		assert video.getPointer() != -1;
+		System.out.println("We have a pointer @ " + video.getPointer() + "!");
 		assert video.getSource().equalsIgnoreCase(videoPath);
-		video.read();
+		System.out.println("Verified that our source matched our CPP's source!!!");
+		for(int i=0; i < 1000; i++)
+			video.read();
+		System.out.println("WE PASSED LIBAVCODEC WOOO *champagne pop*");
 	}
 
 }

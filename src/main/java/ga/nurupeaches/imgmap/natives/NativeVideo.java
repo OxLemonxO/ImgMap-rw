@@ -1,20 +1,25 @@
 package ga.nurupeaches.imgmap.natives;
 
+import ga.nurupeaches.imgmap.context.MassUpdateContext;
+
 public class NativeVideo {
 
-	private native void read(long pointer, Object callback);
+	private native void read(long pointer, NativeVideo video, Object callback);
 	private native String getSource(long pointer);
 	private native long newNativeVideo(String filepath);
+	private native int getWidth(long pointer);
+	private native int getHeight(long pointer);
 
-	private final NativeCallbackHandler handler = new NativeCallbackHandler();
+	private final NativeCallbackHandler handler;
 	private long pointer;
 
-	public NativeVideo(String source){
+	public NativeVideo(MassUpdateContext context, String source){
+		handler = new NativeCallbackHandler(context);
 		pointer = newNativeVideo(source);
 	}
 
 	public void read(){
-		read(pointer, handler);
+		read(pointer, this, handler);
 	}
 
 	public String getSource(){
@@ -25,6 +30,14 @@ public class NativeVideo {
 
 	public long getPointer(){
 		return pointer;
+	}
+
+	public int getWidth(){
+		return getWidth(pointer);
+	}
+
+	public int getHeight(){
+		return getHeight(pointer);
 	}
 
 }

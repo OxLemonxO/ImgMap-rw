@@ -3,6 +3,7 @@ package ga.nurupeaches.imgmap.cmd;
 import ga.nurupeaches.imgmap.context.Context;
 import ga.nurupeaches.imgmap.context.MapContext;
 import ga.nurupeaches.imgmap.context.MultiMapContext;
+import ga.nurupeaches.imgmap.context.SimpleAnimatedMapContext;
 import ga.nurupeaches.imgmap.utils.IOHelper;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -67,6 +68,10 @@ public class DrawImageCommand extends CommandHandler {
 				((MultiMapContext)context).updateSizes(xSize, ySize);
 				((MultiMapContext)context).updateIds(Context._conv(toUse));
 			}
+		} else if(arguments[0].endsWith(".mp4")){
+			context = new SimpleAnimatedMapContext(arguments[0], stack.getDurability());
+			((SimpleAnimatedMapContext)context).addViewer(player.getUniqueId());
+			((SimpleAnimatedMapContext)context).startThreads();
 		} else {
 			if(context == null){
 				context = new MapContext(stack.getDurability());

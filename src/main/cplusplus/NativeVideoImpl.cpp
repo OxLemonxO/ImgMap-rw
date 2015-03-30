@@ -15,6 +15,7 @@ NativeVideoImpl::NativeVideoImpl(string src){
 
 int NativeVideoImpl::open(){
 	// open video
+	formatContext = avformat_alloc_context();
 	if(avformat_open_input(&formatContext, videoSource.c_str(), NULL, NULL) != 0)
 		return -1; // I/O open error
 
@@ -63,19 +64,31 @@ bool NativeVideoImpl::isOpen(){
 	return hasOpened;
 }
 
-int** NativeVideoImpl::fetchNextFrame(){
-	if(av_read_frame(formatContext, &packet) >= 0 && packet.stream_index == videoStreamId){
-		avcodec_decode_video2(codecContext, frame, &frameFinished, &packet);
+int NativeVideoImpl::getHeight(){
+	return codecContext->height;
+}
 
-		if(frameFinished){
-			i++;
+int NativeVideoImpl::getWidth(){
+ 	return codecContext->width;
+}
 
-			sws_scale(imgConvertContext, (const uint8_t* const*)frame->data, frame->linesize, 0, codecContext->height,
-						frameRGB->data, frameRGB->linesize);
+AVFrame* NativeVideoImpl::fetchNextFrame(){
+	while(av_read_frame(formatContext, &packet) >= 0){
+		if(packet.stream_index == videoStreamId){
+			avcodec_decode_video2(codecContext, frame, &frameFinished, &packet);
 
-			// do stuff with frameRGB->data
+			if(frameFinished){
+				i++;
+
+				sws_scale(imgConvertContext, (const uint8_t* const*)frame->data, frame->linesize, 0, codecContext->height,
+							frameRGB->data, frameRGB->linesize);
+
+				// do stuff with frameRGB->data
+				return frameRGB;
+			}
 		}
 	}
+
 	return 0;
 }
 
