@@ -23,7 +23,7 @@ public abstract class Context {
 	};
 
 	public abstract void updateContent(Notifiable notifiable, String source, BufferedImage image);
-	public abstract void update();
+	public abstract void update(Object... additionalParams);
 
 	public abstract void write(DataOutputStream stream) throws IOException;
 	public abstract void read(DataInputStream stream) throws IOException;
@@ -51,7 +51,7 @@ public abstract class Context {
 			}
 		}
 
-		System.out.println("registered " + context);
+		System.out.println("registered3 " + context);
 	}
 
 	// TODO: Find a better way of getting numbers inbetween.

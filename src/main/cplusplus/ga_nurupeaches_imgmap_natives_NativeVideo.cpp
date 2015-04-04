@@ -62,4 +62,8 @@ extern "C" {
 		return ((NativeVideoImpl*)pointer)->getHeight();
 	}
 
+	JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close(JNIEnv* env, jobject thisObject, jlong pointer){
+		((NativeVideoImpl*)pointer)->close();
+	}
+
 }

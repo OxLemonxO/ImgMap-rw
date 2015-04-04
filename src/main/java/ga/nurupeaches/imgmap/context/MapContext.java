@@ -38,7 +38,7 @@ public class MapContext extends Context {
 	}
 
 	@Override
-	public void update(){
+	public void update(Object... params){
 		MapView view = Bukkit.getMap(id);
 		for(Player player : Bukkit.getOnlinePlayers()){
 			player.sendMap(view);

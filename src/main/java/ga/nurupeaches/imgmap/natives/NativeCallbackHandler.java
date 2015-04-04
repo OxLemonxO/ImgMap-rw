@@ -1,38 +1,25 @@
 package ga.nurupeaches.imgmap.natives;
 
-import ga.nurupeaches.imgmap.context.MassUpdateContext;
+import ga.nurupeaches.imgmap.context.Context;
 
-import java.awt.*;
-import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 
 public class NativeCallbackHandler {
 
-	private final MassUpdateContext context;
+	private final Context context;
 
-	public NativeCallbackHandler(MassUpdateContext context){
+	public NativeCallbackHandler(Context context){
 		this.context = context;
 	}
 
+	// Called by JNI
 	public void handleData(NativeVideo video, byte[] data){
-		BufferedImage image = wrapInImage(data, video.getWidth(), video.getHeight());
-		context.massUpdate(image);
-	}
+		BufferedImage image = new BufferedImage(video.getWidth(), video.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+		byte[] rawImage = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
+		System.arraycopy(data, 0, rawImage, 0, data.length);
 
-
-	public static BufferedImage wrapInImage(byte[] imgData, int w, int h) {
-		DataBuffer db = new DataBufferByte(imgData, w * h * 3);
-
-		WritableRaster raster = WritableRaster.createInterleavedRaster(
-				db, w, h, w * 3, 3, new int[]{0, 1, 2}, null);
-
-		ColorModel colorModel = new ComponentColorModel(
-				ColorSpace.getInstance(ColorSpace.CS_sRGB),
-				new int[]{8,8,8}, false, false,
-				Transparency.OPAQUE,
-				DataBuffer.TYPE_BYTE);
-
-		return new BufferedImage(colorModel, raster, false, null);
+		context.update(image);
 	}
 
 }

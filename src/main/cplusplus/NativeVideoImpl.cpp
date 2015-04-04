@@ -54,7 +54,7 @@ int NativeVideoImpl::open(){
 	avpicture_fill((AVPicture*)frameRGB, buffer, PIX_FMT_RGB24, codecContext->width, codecContext->height);
 
 	imgConvertContext = sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
-										codecContext->width, codecContext->height, PIX_FMT_RGB24, SWS_BICUBIC,
+										codecContext->width, codecContext->height, PIX_FMT_BGR24, SWS_BICUBIC,
 										NULL, NULL, NULL);
 	hasOpened = true;
 	return 0;
@@ -83,13 +83,14 @@ AVFrame* NativeVideoImpl::fetchNextFrame(){
 				sws_scale(imgConvertContext, (const uint8_t* const*)frame->data, frame->linesize, 0, codecContext->height,
 							frameRGB->data, frameRGB->linesize);
 
-				// do stuff with frameRGB->data
-				return frameRGB;
+				av_free_packet(&packet);
+				break;
 			}
 		}
+
+		av_free_packet(&packet);
 	}
 
-	close();
 	return frameRGB;
 }
 

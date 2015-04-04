@@ -118,6 +118,7 @@ public class ImgMapPlugin extends JavaPlugin {
 					id = 0x02;
 				} else if(context instanceof SimpleAnimatedMapContext){
 					((SimpleAnimatedMapContext)context).stopThreads(); // Don't write it.
+					((SimpleAnimatedMapContext)context)._video().close();
 				}
 
 				if(id != 0x7F){

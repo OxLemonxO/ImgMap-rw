@@ -47,6 +47,14 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getWidth
 JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getHeight
   (JNIEnv *, jobject, jlong);
 
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    close
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close
+  (JNIEnv *, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

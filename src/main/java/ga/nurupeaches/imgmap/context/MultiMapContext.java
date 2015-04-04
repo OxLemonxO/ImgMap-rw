@@ -2,6 +2,7 @@ package ga.nurupeaches.imgmap.context;
 
 import ga.nurupeaches.imgmap.ImgMapPlugin;
 import ga.nurupeaches.imgmap.nms.Adapter;
+import ga.nurupeaches.imgmap.nms.MapPacket;
 import ga.nurupeaches.imgmap.renderer.SingleImageRenderer;
 import ga.nurupeaches.imgmap.utils.IOHelper;
 import ga.nurupeaches.imgmap.utils.MapUtils;
@@ -82,7 +83,7 @@ public class MultiMapContext extends Context {
 	}
 
 	@Override
-	public void update(){
+	public void update(Object... params){
 		List<MapRenderer> renderers;
 		MapRenderer first;
 
@@ -90,10 +91,12 @@ public class MultiMapContext extends Context {
 			renderers = Bukkit.getMap(id).getRenderers();
 			first = renderers.get(0);
 			if(renderers.size() > 0 && first instanceof SingleImageRenderer){
+				MapPacket packet = Adapter.convertImageToPackets(id, ((SingleImageRenderer)first).getImage());
+
 				for(Player player : Bukkit.getOnlinePlayers()){
 					// Rapid calls to Player.sendMap(MapView) stalls the server trying to buffer RenderData.
 					// This, right here, bypasses all of that and immediately ships data off to the client.
-					Adapter.convertImageToPackets(id, ((SingleImageRenderer)first).getImage()).send(player);
+					packet.send(player);
 				}
 			}
 		}

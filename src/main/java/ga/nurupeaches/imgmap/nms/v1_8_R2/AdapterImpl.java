@@ -12,11 +12,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class AdapterImpl extends Adapter {
 
+	private static final List<MapIcon> DUMMY_LIST = Collections.unmodifiableList(new ArrayList<MapIcon>());
+
 	@Override
-	protected MapPacket _generatePacket(int id, byte[] data) {
+	protected MapPacket _generatePacket(short id, byte[] data) {
 		return new MapPacketImpl(id, data);
 	}
 
@@ -42,9 +46,9 @@ public class AdapterImpl extends Adapter {
 		private PacketPlayOutMap packet;
 
 		// new PacketPlayOutMap(map.getId(), map.getScale().getValue(), icons, data.buffer, 0, 0, 0, 0);
-		MapPacketImpl(int id, byte[] data){
+		MapPacketImpl(short id, byte[] data){
 			packet = new PacketPlayOutMap(id, MapView.Scale.FARTHEST.getValue(),
-					new ArrayList<MapIcon>(), data, 0, 0, 0, 0);
+					DUMMY_LIST, data, 0, 0, 128, 128);
 		}
 
 		public void send(Player player){

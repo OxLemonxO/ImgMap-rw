@@ -7,14 +7,13 @@ public class NativeVideoTest {
 		System.load("/home/tsunko/Gunvarrel/ImgMap-rw/src/main/cplusplus/libNativeVideo.so");
 
 		String videoPath = "/home/tsunko/Videos/NichijouNativeVideo.mp4";
-		NativeVideo video = null;
+		NativeVideo video = new NativeVideo(new DummyNCH(), videoPath);
 
 		assert video.getPointer() != -1;
 		System.out.println("We have a pointer @ " + video.getPointer() + "!");
 		assert video.getSource().equalsIgnoreCase(videoPath);
 		System.out.println("Verified that our source matched our CPP's source!!!");
-		for(int i=0; i < 1000; i++)
-			video.read();
+		video.read();
 		System.out.println("WE PASSED LIBAVCODEC WOOO *champagne pop*");
 	}
 
