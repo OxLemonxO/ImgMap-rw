@@ -38,6 +38,7 @@ extern "C" {
 		avpicture_layout((AVPicture*)frame, PIX_FMT_RGB24, impl->getCodec()->width, impl->getCodec()->height, buffer, bufferSize);
 		env->SetByteArrayRegion(arr, 0, bufferSize, (jbyte*)buffer);
 		doCallback(env, callback, javaNV, arr);
+		delete[] buffer;
 		env->DeleteLocalRef(arr);
 	}
 
