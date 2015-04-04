@@ -8,6 +8,7 @@ NativeVideoImpl::NativeVideoImpl(string src){
 		av_register_all();
 		avcodec_register_all();
 		avformat_network_init();
+		initialized = true;
 	}
 
 	videoSource = src;

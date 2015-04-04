@@ -39,6 +39,7 @@ class NativeVideoImpl {
 		NativeVideoImpl (string src);
 		AVFrame* fetchNextFrame();
 		string getSource(){ return videoSource; }
+		AVCodecContext* getCodec(){ return codecContext; }
 		void fillRGBData(uint8_t* data);
 		int open();
 		bool isOpen();

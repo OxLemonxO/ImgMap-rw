@@ -32,18 +32,13 @@ extern "C" {
 		}
 
 		AVFrame* frame = impl->fetchNextFrame();
-		std::vector<jbyte> javaBytes;
-		int y, i, iMax = impl->getWidth()*3;
-
-		for(y=0; y < impl->getHeight(); y++){
-			for(i=0; i < iMax; i++){
-				javaBytes.push_back((frame->data[0]+y*frame->linesize[0])[i]);
-			}
-		}
-
-		jbyteArray arr = env->NewByteArray(javaBytes.size());
-		env->SetByteArrayRegion(arr, 0, javaBytes.size(), javaBytes.data());
+		int bufferSize = avpicture_get_size(PIX_FMT_RGB24, impl->getCodec()->width, impl->getCodec()->height);
+		jbyteArray arr = env->NewByteArray(bufferSize);
+		unsigned char* buffer = new unsigned char[bufferSize];
+		avpicture_layout((AVPicture*)frame, PIX_FMT_RGB24, impl->getCodec()->width, impl->getCodec()->height, buffer, bufferSize);
+		env->SetByteArrayRegion(arr, 0, bufferSize, (jbyte*)buffer);
 		doCallback(env, callback, javaNV, arr);
+		env->DeleteLocalRef(arr);
 	}
 
 	JNIEXPORT jlong JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_newNativeVideo(JNIEnv* env, jobject thisObject, jstring string){
