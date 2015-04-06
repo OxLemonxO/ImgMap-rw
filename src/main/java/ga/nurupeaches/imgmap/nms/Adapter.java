@@ -44,12 +44,8 @@ public abstract class Adapter {
         int[] imageRGB = new int[128 * 128];
         image.getRGB(0, 0, 128, 128, imageRGB, 0, 128);
 
-        byte color;
         for(int i=0; i < data.length; i++){
-            color = getColor(imageRGB[i]);
-            if(color >= 0 || color <= -113) { // ???? Transparent colors.
-                data[i] = color;
-            }
+            data[i] = getColor(imageRGB[i]);
         }
 
         return generatePacket(id, data);
@@ -70,8 +66,8 @@ public abstract class Adapter {
     // Same as Bukkit's, but this one is a more "direct" translation.
     private static double getDistance(int rgb, Color color){
         double rmean = (double)(((rgb >> 16) & 0xFF) + color.getRed()) / 2.0D;
-        double r = (double)(((rgb >> 16) & 0xFF) - color.getRed());
-        double g = (double)(((rgb >> 8) & 0xFF) - color.getGreen());
+        double r = (double)((rgb >> 16) & 0xFF) - color.getRed();
+        double g = (double)((rgb >> 8) & 0xFF) - color.getGreen();
         int b = (rgb & 0xFF) - color.getBlue();
         double weightR = 2.0D + rmean / 256.0D;
         double weightG = 4.0D;
