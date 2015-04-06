@@ -14,16 +14,17 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class MapContext extends Context {
+public class ImageMapContext extends Context {
 
     private short id;
 
-	public MapContext(short id){
+	public ImageMapContext(short id){
 		this.id = id;
 	}
 
-    public MapContext(){}
+    public ImageMapContext(){}
 
+	@Override
 	public short getId(){
 		return id;
 	}

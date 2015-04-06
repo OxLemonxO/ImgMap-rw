@@ -32,18 +32,18 @@ extern "C" {
 		}
 
 		AVFrame* frame = impl->fetchNextFrame();
-		int bufferSize = avpicture_get_size(PIX_FMT_RGB24, impl->getCodec()->width, impl->getCodec()->height);
+		unsigned char* buffer = impl->getBuffer();
+		int bufferSize = impl->getBufferSize();
 		jbyteArray arr = env->NewByteArray(bufferSize);
-		unsigned char* buffer = new unsigned char[bufferSize];
-		avpicture_layout((AVPicture*)frame, PIX_FMT_RGB24, impl->getCodec()->width, impl->getCodec()->height, buffer, bufferSize);
+
+		avpicture_layout((AVPicture*)frame, PIX_FMT_RGB24, impl->getWidth(), impl->getHeight(), buffer, bufferSize);
 		env->SetByteArrayRegion(arr, 0, bufferSize, (jbyte*)buffer);
 		doCallback(env, callback, javaNV, arr);
-		delete[] buffer;
 		env->DeleteLocalRef(arr);
 	}
 
-	JNIEXPORT jlong JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_newNativeVideo(JNIEnv* env, jobject thisObject, jstring string){
-		return (jlong)(NativeVideoImpl*)new NativeVideoImpl(jstrToStr(env, string));
+	JNIEXPORT jlong JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_newNativeVideo(JNIEnv* env, jobject thisObject, jstring string, jint dW, jint dH){
+  		return (jlong)(NativeVideoImpl*)new NativeVideoImpl(jstrToStr(env, string), (int)dW, (int)dH);
 	}
 
 	JNIEXPORT jstring JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getSource(JNIEnv* env, jobject thisObject, jlong pointer){
@@ -56,6 +56,10 @@ extern "C" {
 
 	JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getHeight(JNIEnv* env, jobject thisObject, jlong pointer){
 		return ((NativeVideoImpl*)pointer)->getHeight();
+	}
+
+	JNIEXPORT jboolean JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_isStreaming(JNIEnv* env, jobject thisObject, jlong pointer){
+		return ((NativeVideoImpl*)pointer)->isOpen();
 	}
 
 	JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close(JNIEnv* env, jobject thisObject, jlong pointer){

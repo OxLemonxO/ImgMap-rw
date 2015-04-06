@@ -1,11 +1,9 @@
 package ga.nurupeaches.imgmap.cmd;
 
 import ga.nurupeaches.imgmap.context.Context;
-import ga.nurupeaches.imgmap.context.MapContext;
-import ga.nurupeaches.imgmap.context.MultiMapContext;
-import ga.nurupeaches.imgmap.context.SimpleAnimatedMapContext;
+import ga.nurupeaches.imgmap.context.ImageMapContext;
+import ga.nurupeaches.imgmap.context.ImageMultiMapContext;
 import ga.nurupeaches.imgmap.utils.IOHelper;
-import ga.nurupeaches.imgmap.utils.YTRegexHelper;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,8 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
 
 public class DrawImageCommand extends CommandHandler {
 
@@ -32,8 +28,7 @@ public class DrawImageCommand extends CommandHandler {
 			return;
 		}
 
-		BufferedImage image = null;
-		if(!arguments[1].equals("-vid"))
+		BufferedImage image;
 		try {
 			image = IOHelper.fetchImage(new URL(arguments[0]));
 		} catch (IOException e){
@@ -42,41 +37,32 @@ public class DrawImageCommand extends CommandHandler {
 			return;
 		}
 
-
 		Context context = Context.getContext(stack.getDurability());
-		if(arguments.length >= 4 && arguments[1].equalsIgnoreCase("-mm")){
+		if(arguments.length > 1 && arguments[1].startsWith("-mm")){
+			// -mm:x:y
 			commandWarning(sender, "Multi-map mode is being used!");
-			int xSize, ySize;
-
+			String[] params = arguments[1].split(":");
+			int x, y;
 			try{
-				xSize = Integer.parseInt(arguments[2]);
-				ySize = Integer.parseInt(arguments[3]);
-			} catch (NumberFormatException e){
-				commandFailure(sender, "The given dimensions for canvas were not valid.");
+				x = Integer.parseInt(params[1]);
+				y = Integer.parseInt(params[2]);
+			} catch (NumberFormatException e) {
+				commandFailure(sender, "The given dimensions for canvas were not numbers.");
 				return;
 			}
 
-			List<Short> toUse = new LinkedList<Short>();
-			for(int i=0; i < xSize * ySize; i++){
-				toUse.add((short)(i + stack.getDurability()));
-			}
-			sender.sendMessage("using ids " + toUse.toString());
+			short[] ids = getIdsBetween(stack.getDurability(), (short)(stack.getDurability() + (x * y)));
 
-			if(context == null){
-				context = new MultiMapContext(Context._conv(toUse), xSize, ySize);
+			if(!(context instanceof ImageMultiMapContext)){
+				context = new ImageMultiMapContext(ids, x, y);
 			}
 
-			if(context instanceof MultiMapContext){
-				((MultiMapContext)context).updateSizes(xSize, ySize);
-				((MultiMapContext)context).updateIds(Context._conv(toUse));
-			}
-		} else if(arguments[1].equalsIgnoreCase("-vid")){
-			context = new SimpleAnimatedMapContext(YTRegexHelper.getDirectLinks(arguments[0]).get(0), stack.getDurability());
-			((SimpleAnimatedMapContext)context).addViewer(player.getUniqueId());
-			((SimpleAnimatedMapContext)context).startThreads();
+			ImageMultiMapContext casted = (ImageMultiMapContext)context;
+			casted.updateSizes(x, y);
+			casted.updateIds(ids);
 		} else {
-			if(context == null){
-				context = new MapContext(stack.getDurability());
+			if(!(context instanceof ImageMapContext)){
+				context = new ImageMapContext(stack.getDurability());
 			}
 		}
 

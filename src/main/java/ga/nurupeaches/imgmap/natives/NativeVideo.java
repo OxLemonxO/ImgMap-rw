@@ -6,22 +6,23 @@ public class NativeVideo {
 
 	private native void read(long pointer, NativeVideo video, Object callback);
 	private native String getSource(long pointer);
-	private native long newNativeVideo(String filepath);
+	private native long newNativeVideo(String filepath, int width, int height);
 	private native int getWidth(long pointer);
 	private native int getHeight(long pointer);
+	private native boolean isStreaming(long pointer);
 	private native void close(long pointer);
 
 	private final NativeCallbackHandler handler;
 	private long pointer;
 
-	protected NativeVideo(NativeCallbackHandler handler, String source){
-		this.handler = handler;
-		pointer = newNativeVideo(source);
+	public NativeVideo(Context context, String source, int width, int height){
+		handler = new NativeCallbackHandler(context);
+		pointer = newNativeVideo(source, width, height);
 	}
 
-	public NativeVideo(Context context, String source){
-		handler = new NativeCallbackHandler(context);
-		pointer = newNativeVideo(source);
+	public NativeVideo(NativeCallbackHandler handler, String source, int width, int height){
+		this.handler = handler;
+		this.pointer = newNativeVideo(source, width, height);
 	}
 
 	public void read(){
@@ -44,6 +45,10 @@ public class NativeVideo {
 
 	public int getHeight(){
 		return getHeight(pointer);
+	}
+
+	public boolean isStreaming(){
+		return isStreaming(pointer);
 	}
 
 	public void close(){

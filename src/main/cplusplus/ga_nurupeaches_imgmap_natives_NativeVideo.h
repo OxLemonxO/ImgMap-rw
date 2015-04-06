@@ -10,7 +10,7 @@ extern "C" {
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    read
- * Signature: (JLjava/lang/Object;)V
+ * Signature: (JLga/nurupeaches/imgmap/natives/NativeVideo;Ljava/lang/Object;)V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read
   (JNIEnv *, jobject, jlong, jobject, jobject);
@@ -26,10 +26,10 @@ JNIEXPORT jstring JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getSour
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    newNativeVideo
- * Signature: (Ljava/lang/String;)J
+ * Signature: (Ljava/lang/String;II)J
  */
 JNIEXPORT jlong JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_newNativeVideo
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jstring, jint, jint);
 
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
@@ -45,6 +45,14 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getWidth
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getHeight
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    isStreaming
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_isStreaming
   (JNIEnv *, jobject, jlong);
 
 /*

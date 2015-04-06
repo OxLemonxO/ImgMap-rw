@@ -1,10 +1,12 @@
 package ga.nurupeaches.imgmap;
 
 import ga.nurupeaches.imgmap.cmd.DrawImageCommand;
+import ga.nurupeaches.imgmap.cmd.DrawVideoCommand;
+import ga.nurupeaches.imgmap.cmd.JoinVideoCommand;
+import ga.nurupeaches.imgmap.context.AnimatedMapContext;
 import ga.nurupeaches.imgmap.context.Context;
-import ga.nurupeaches.imgmap.context.MapContext;
-import ga.nurupeaches.imgmap.context.MultiMapContext;
-import ga.nurupeaches.imgmap.context.SimpleAnimatedMapContext;
+import ga.nurupeaches.imgmap.context.ImageMapContext;
+import ga.nurupeaches.imgmap.context.ImageMultiMapContext;
 import ga.nurupeaches.imgmap.utils.IOHelper;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,6 +29,8 @@ public class ImgMapPlugin extends JavaPlugin {
     public void onEnable(){
         SINGLETON = this;
 		getCommand("drawimage").setExecutor(new DrawImageCommand());
+		getCommand("drawvideo").setExecutor(new DrawVideoCommand());
+		getCommand("joinvideo").setExecutor(new JoinVideoCommand());
 		loadContexts();
 
 		System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
@@ -66,10 +70,10 @@ public class ImgMapPlugin extends JavaPlugin {
 
 				switch(contextType){
 					case 0x01:
-						context = new MapContext();
+						context = new ImageMapContext();
 						break;
 					case 0x02:
-						context = new MultiMapContext();
+						context = new ImageMultiMapContext();
 						break;
 				}
 
@@ -112,13 +116,13 @@ public class ImgMapPlugin extends JavaPlugin {
 
 			byte id = 0x7F; // 7F is limit for IDs
 			for(Context context : contexts){
-				if(context instanceof MapContext){
+				if(context instanceof ImageMapContext){
 					id = 0x01;
-				} else if(context instanceof MultiMapContext){
+				} else if(context instanceof ImageMultiMapContext){
 					id = 0x02;
-				} else if(context instanceof SimpleAnimatedMapContext){
-					((SimpleAnimatedMapContext)context).stopThreads(); // Don't write it.
-					((SimpleAnimatedMapContext)context)._video().close();
+				} else if(context instanceof AnimatedMapContext){
+					((AnimatedMapContext)context).stopThreads(); // Don't write it.
+					((AnimatedMapContext)context).getVideo().close();
 				}
 
 				if(id != 0x7F){

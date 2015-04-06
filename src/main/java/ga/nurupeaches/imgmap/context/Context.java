@@ -28,6 +28,8 @@ public abstract class Context {
 	public abstract void write(DataOutputStream stream) throws IOException;
 	public abstract void read(DataInputStream stream) throws IOException;
 
+	public abstract short getId();
+
 	public static Collection<Context> getContexts(){
 		return Collections.unmodifiableMap(CONTEXT_LOOKUP).values();
 	}
@@ -43,25 +45,18 @@ public abstract class Context {
 	}
 
 	public static void registerContext(Context context){
-		if(context instanceof MapContext){
-			CONTEXT_LOOKUP.put(((MapContext)context).getId(), context);
-		} else if(context instanceof MultiMapContext){
-			for(short id : ((MultiMapContext)context).getIds()){
+		if(context instanceof ImageMultiMapContext){
+			for(short id : ((ImageMultiMapContext)context).getIds()){
 				CONTEXT_LOOKUP.put(id, context);
 			}
+		} else if(context instanceof AnimatedMultiMapContext){
+			for(short id : ((AnimatedMultiMapContext)context).getIds()){
+				CONTEXT_LOOKUP.put(id, context);
+			}
+		} else {
+			CONTEXT_LOOKUP.put(context.getId(), context);
+			System.out.println("registered3 " + context);
 		}
-
-		System.out.println("registered3 " + context);
-	}
-
-	// TODO: Find a better way of getting numbers inbetween.
-	public static short[] _conv(List<Short> ids){
-		Iterator<Short> iter = ids.iterator();
-		short[] arr = new short[ids.size()];
-		for(int i=0; i < arr.length; i++){
-			arr[i] = iter.next();
-		}
-		return arr;
 	}
 
 	public interface Notifiable {

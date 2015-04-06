@@ -1,4 +1,4 @@
-CXX = g++ -fPIC -pedantic -fpermissive
+CXX = g++ -fPIC -pedantic -std=c++11
 CXXFLAGS = -Wall -g -lavformat -lavcodec -lswscale
 
 libNativeVideo.so : NativeVideoImpl.o ga_nurupeaches_imgmap_natives_NativeVideo.o

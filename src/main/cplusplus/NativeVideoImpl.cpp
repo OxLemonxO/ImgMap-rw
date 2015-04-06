@@ -3,7 +3,7 @@
 // static variable to track if we've registered codecs and formats, along with initializing the networking power
 static bool initialized = false;
 
-NativeVideoImpl::NativeVideoImpl(string src){
+NativeVideoImpl::NativeVideoImpl(string src, int dw = 0, int dh = 0){
 	if(!initialized){
 		av_register_all();
 		avcodec_register_all();
@@ -12,6 +12,8 @@ NativeVideoImpl::NativeVideoImpl(string src){
 	}
 
 	videoSource = src;
+	destWidth = dw;
+	destHeight = dh;
 }
 
 int NativeVideoImpl::open(){
@@ -36,6 +38,15 @@ int NativeVideoImpl::open(){
 		return -3; // No video stream
 
 	codecContext = formatContext->streams[videoStreamId]->codec;
+
+	if(destWidth == 0){
+		destWidth = codecContext->width;
+	}
+
+	if(destHeight == 0){
+		destHeight = codecContext->height;
+	}
+
 	codec = avcodec_find_decoder(codecContext->codec_id);
 	if(codec == NULL)
 		return -4; // No codec found
@@ -49,14 +60,15 @@ int NativeVideoImpl::open(){
 	if(frame == NULL || frameRGB == NULL)
 		return -6; // Failed to allocate frames
 
-	int bytesRequired = avpicture_get_size(PIX_FMT_RGB24, codecContext->width, codecContext->height);
-	buffer = (uint8_t*)av_malloc(bytesRequired * sizeof(uint8_t));
-
-	avpicture_fill((AVPicture*)frameRGB, buffer, PIX_FMT_RGB24, codecContext->width, codecContext->height);
-
 	imgConvertContext = sws_getContext(codecContext->width, codecContext->height, codecContext->pix_fmt,
-										codecContext->width, codecContext->height, PIX_FMT_BGR24, SWS_BICUBIC,
+										destWidth, destHeight, PIX_FMT_BGR24, SWS_BICUBIC,
 										NULL, NULL, NULL);
+
+	int bytesRequired = avpicture_get_size(PIX_FMT_RGB24, destWidth, destHeight);
+	frameBuffer_size = bytesRequired;
+	frameRGB_buffer = (uint8_t*)av_malloc(bytesRequired * sizeof(uint8_t));
+	avpicture_fill((AVPicture*)frameRGB, frameRGB_buffer, PIX_FMT_RGB24, destWidth, destHeight);
+	setBuffer(new unsigned char[bytesRequired]);
 	hasOpened = true;
 	return 0;
 }
@@ -65,12 +77,12 @@ bool NativeVideoImpl::isOpen(){
 	return hasOpened;
 }
 
-int NativeVideoImpl::getHeight(){
-	return codecContext->height;
+int NativeVideoImpl::getWidth(){
+ 	return destWidth;
 }
 
-int NativeVideoImpl::getWidth(){
- 	return codecContext->width;
+int NativeVideoImpl::getHeight(){
+	return destHeight;
 }
 
 AVFrame* NativeVideoImpl::fetchNextFrame(){
@@ -96,9 +108,14 @@ AVFrame* NativeVideoImpl::fetchNextFrame(){
 }
 
 void NativeVideoImpl::close(){
-	av_free(buffer);
+	av_free(frameRGB_buffer);
 	av_free(frameRGB);
 	av_free(frame);
 	avcodec_close(codecContext);
 	avformat_close_input(&formatContext);
+	av_free(codec);
+	av_free_packet(&packet);
+	sws_freeContext(imgConvertContext);
+	delete[] frameBuffer;
+	hasOpened = false;
 }

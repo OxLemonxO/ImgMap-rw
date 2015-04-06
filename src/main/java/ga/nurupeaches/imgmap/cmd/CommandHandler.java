@@ -45,14 +45,11 @@ public abstract class CommandHandler implements CommandExecutor {
 			return true;
 		}
 
-		preExecution(command, sender);
 		executeCommand(sender, arguments);
 		return true;
 	}
 
 	public abstract void executeCommand(CommandSender sender, String[] arguments);
-
-	public void preExecution(Command command, CommandSender sender){} // Used to notify users of deprecation.
 
 	void commandFailure(CommandSender sender, String reason){
 		sender.sendMessage(ChatColor.RED + "[ImgMap] " + reason);
@@ -64,6 +61,15 @@ public abstract class CommandHandler implements CommandExecutor {
 
 	void commandSuccess(CommandSender sender, String reason){
 		sender.sendMessage(ChatColor.GREEN + "[ImgMap] " + reason);
+	}
+
+	// TODO: Find a better way of getting numbers inbetween.
+	protected static short[] getIdsBetween(short start, short end){
+		short[] ids = new short[end-start];
+		for(short i=start; i < end; i++){
+			ids[i-start] = i;
+		}
+		return ids;
 	}
 
 }
