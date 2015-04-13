@@ -9,59 +9,51 @@ extern "C" {
 #endif
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    initHandler
+ * Signature: (Ljava/lang/Class;)V
+ */
+JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
+  (JNIEnv *, jclass, jclass);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    _init
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init
+  (JNIEnv *, jobject, jint, jint);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
+ * Method:    _open
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    read
- * Signature: (JLga/nurupeaches/imgmap/natives/NativeVideo;Ljava/lang/Object;)V
+ * Signature: (Lga/nurupeaches/imgmap/natives/NativeCallbackHandler;)V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read
-  (JNIEnv *, jobject, jlong, jobject, jobject);
-
-/*
- * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
- * Method:    getSource
- * Signature: (J)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getSource
-  (JNIEnv *, jobject, jlong);
-
-/*
- * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
- * Method:    newNativeVideo
- * Signature: (Ljava/lang/String;II)J
- */
-JNIEXPORT jlong JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_newNativeVideo
-  (JNIEnv *, jobject, jstring, jint, jint);
-
-/*
- * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
- * Method:    getWidth
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getWidth
-  (JNIEnv *, jobject, jlong);
-
-/*
- * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
- * Method:    getHeight
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_getHeight
-  (JNIEnv *, jobject, jlong);
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    isStreaming
- * Signature: (J)Z
+ * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_isStreaming
-  (JNIEnv *, jobject, jlong);
+  (JNIEnv *, jobject);
 
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    close
- * Signature: (J)V
+ * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close
-  (JNIEnv *, jobject, jlong);
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

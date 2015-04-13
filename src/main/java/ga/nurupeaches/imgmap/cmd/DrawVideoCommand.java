@@ -62,16 +62,19 @@ public class DrawVideoCommand extends CommandHandler {
 			}
 		}
 
-		((WatchableContext)context).addViewer(player.getUniqueId());
-		context.updateContent(new Context.Notifiable() {
+		WatchableContext casted = (WatchableContext)context;
+		casted.clearViewers();
+		casted.updateContent(new Context.Notifiable() {
 			@Override
 			public void sendMessage(String message) {
 				player.sendMessage(message);
 			}
 		}, url, null);
-		Context.registerContext(context);
+		Context.registerContext(casted);
 		commandSuccess(sender, "Rendering " + url + "...");
-		((WatchableContext)context).startThreads();
+
+		casted.addViewer(player.getUniqueId());
+		casted.startThreads();
 	}
 
 }

@@ -4,12 +4,6 @@
 #include <string>
 #include <jni.h>
 
-extern "C" {
-	#include "libavcodec/avcodec.h"
-	#include "libavformat/avformat.h"
-	#include "libswscale/swscale.h"
-}
-
 using std::string;
 
 class NativeVideoImpl {
@@ -43,7 +37,6 @@ class NativeVideoImpl {
 		AVFrame* fetchNextFrame();
 		string getSource(){ return videoSource; }
 		AVCodecContext* getCodec(){ return codecContext; }
-		void setBuffer(unsigned char* buf){ frameBuffer = buf; }
 		int getBufferSize(){ return frameBuffer_size; }
 		unsigned char* getBuffer(){ return frameBuffer; }
 		void fillRGBData(uint8_t* data);

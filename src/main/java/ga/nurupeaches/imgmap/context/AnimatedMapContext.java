@@ -21,7 +21,8 @@ public class AnimatedMapContext extends WatchableContext {
 	public AnimatedMapContext(String videoSource, short id){
 		this.id = id;
 		view = Bukkit.getMap(id);
-		video = new NativeVideo(this, videoSource, 128, 128);
+		// TODO: HELP
+		video = new NativeVideo(null, 128, 128);
 	}
 
 	@Override
@@ -32,7 +33,8 @@ public class AnimatedMapContext extends WatchableContext {
 			public void run(){
 				// Guarantees that we execute this at LEAST once.
 				do {
-					video.read();
+					// TODO: HELP
+//					video.read();
 					try{
 						Thread.sleep(12);
 					} catch (InterruptedException e){

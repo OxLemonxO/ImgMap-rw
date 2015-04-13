@@ -5,7 +5,7 @@ import ga.nurupeaches.imgmap.context.Context;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
-public class NativeCallbackHandler {
+public class NativeCallbackHandler implements CallbackHandler {
 
 	private byte[] rawImage;
 	private BufferedImage image;
@@ -16,9 +16,11 @@ public class NativeCallbackHandler {
 	}
 
 	// Called by JNI
-	public void handleData(NativeVideo video, byte[] data){
+	@Override
+	public void handleData(byte[] data){
 		if(image == null){
-			image = new BufferedImage(video.getWidth(), video.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+			// TODO: HELP
+			image = new BufferedImage(0, 0, BufferedImage.TYPE_3BYTE_BGR);
 			rawImage = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
 		}
 

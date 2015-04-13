@@ -6,6 +6,7 @@ import ga.nurupeaches.imgmap.nms.MapPacket;
 import ga.nurupeaches.imgmap.utils.MapUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MapView;
 
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
@@ -52,10 +53,10 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 		nativeThread = new Thread(new Runnable(){
 			@Override
 			public void run(){
-				// Guarantees that we execute this at LEAST once.
-				do {
-					video.read();
-				} while (streaming);
+					// Guarantees that we execute this at LEAST once.
+					do {
+						video.read(null);
+					} while(streaming);
 			}
 		});
 		nativeThread.start();
@@ -84,13 +85,16 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 
 	@Override
 	public void updateContent(Notifiable notifiable, String source, BufferedImage image){
-		video = new NativeVideo(this, source, sizeX * 128, sizeY * 128);
+		video = new NativeVideo(this, sizeX * 128, sizeY * 128);
 
+		MapView view;
 		for(short id : ids){
-			MapUtils.clearRenderers(Bukkit.getMap(id));
-			if(Bukkit.getMap(id) == null){
-				Adapter.generateMap(Bukkit.getWorlds().get(0), id);
+			view = Bukkit.getMap(id);
+			if(view == null){
+				view = Adapter.generateMap(Bukkit.getWorlds().get(0), id);
 			}
+
+			MapUtils.clearRenderers(view);
 		}
 
 		history.add(source);

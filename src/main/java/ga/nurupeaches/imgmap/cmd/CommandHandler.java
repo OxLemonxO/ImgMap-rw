@@ -63,8 +63,7 @@ public abstract class CommandHandler implements CommandExecutor {
 		sender.sendMessage(ChatColor.GREEN + "[ImgMap] " + reason);
 	}
 
-	// TODO: Find a better way of getting numbers inbetween.
-	protected static short[] getIdsBetween(short start, short end){
+	protected short[] getIdsBetween(short start, short end){
 		short[] ids = new short[end-start];
 		for(short i=start; i < end; i++){
 			ids[i-start] = i;

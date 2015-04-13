@@ -22,6 +22,10 @@ public abstract class WatchableContext extends Context {
 		viewers.add(uuid);
 	}
 
+	public void clearViewers(){
+		viewers.clear();
+	}
+
 	@Override
 	public void write(DataOutputStream stream) throws IOException {}
 

@@ -52,7 +52,6 @@ public class DrawImageCommand extends CommandHandler {
 			}
 
 			short[] ids = getIdsBetween(stack.getDurability(), (short)(stack.getDurability() + (x * y)));
-
 			if(!(context instanceof ImageMultiMapContext)){
 				context = new ImageMultiMapContext(ids, x, y);
 			}
@@ -73,8 +72,9 @@ public class DrawImageCommand extends CommandHandler {
 			}
 		}, arguments[0], image);
 		Context.registerContext(context);
-		commandSuccess(sender, "Drawing " + arguments[0] + "...");
 		context.update(); // Update the map for everyone now.
+
+		commandSuccess(sender, "Drawing " + arguments[0] + "...");
 	}
 
 }

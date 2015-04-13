@@ -2,57 +2,52 @@ package ga.nurupeaches.imgmap.natives;
 
 import ga.nurupeaches.imgmap.context.Context;
 
+import java.io.IOException;
+
 public class NativeVideo {
 
-	private native void read(long pointer, NativeVideo video, Object callback);
-	private native String getSource(long pointer);
-	private native long newNativeVideo(String filepath, int width, int height);
-	private native int getWidth(long pointer);
-	private native int getHeight(long pointer);
-	private native boolean isStreaming(long pointer);
-	private native void close(long pointer);
+	// These two methods should not be handled outside of NativeVideo
+	public static native void initialize(Class<? extends CallbackHandler> klass);
+	private native void _init(int width, int height);
+	private native int _open(String source);
+
+	public native void read(NativeCallbackHandler handler);
+	public native boolean isStreaming();
+	public native void close();
 
 	private final NativeCallbackHandler handler;
-	private long pointer;
 
-	public NativeVideo(Context context, String source, int width, int height){
+	public NativeVideo(Context context, int width, int height){
 		handler = new NativeCallbackHandler(context);
-		pointer = newNativeVideo(source, width, height);
+		_init(width, height);
 	}
 
-	public NativeVideo(NativeCallbackHandler handler, String source, int width, int height){
-		this.handler = handler;
-		this.pointer = newNativeVideo(source, width, height);
+	// For when we debug this thing.
+	protected NativeVideo(NativeCallbackHandler created, int width, int height){
+		handler = created;
+		_init(width, height);
 	}
 
-	public void read(){
-		read(pointer, this, handler);
-	}
-
-	public String getSource(){
-		String str = getSource(pointer);
-		System.out.println(str);
-		return str;
-	}
-
-	public long getPointer(){
-		return pointer;
-	}
-
-	public int getWidth(){
-		return getWidth(pointer);
-	}
-
-	public int getHeight(){
-		return getHeight(pointer);
-	}
-
-	public boolean isStreaming(){
-		return isStreaming(pointer);
-	}
-
-	public void close(){
-		close(pointer);
+	public void open(String source) throws IOException {
+		int status = _open(source);
+		switch(status){
+			case 0:
+				return; // 0 is okay!
+			case 1:
+				throw new IOException("Failed to open file for reading!");
+			case 2:
+				throw new MediaStreamException("No stream information found!");
+			case 3:
+				throw new MediaStreamException("No video stream found!");
+			case 4:
+				throw new CodecException("No codec found!");
+			case 5:
+				throw new CodecException("Failed to find or open a codec context!");
+			case 6:
+				throw new IOException("Failed to allocate proper AVFrames!");
+			default:
+				throw new IOException("Unknown error: " + status);
+		}
 	}
 
 }

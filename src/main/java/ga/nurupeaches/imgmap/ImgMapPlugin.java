@@ -7,6 +7,8 @@ import ga.nurupeaches.imgmap.context.AnimatedMapContext;
 import ga.nurupeaches.imgmap.context.Context;
 import ga.nurupeaches.imgmap.context.ImageMapContext;
 import ga.nurupeaches.imgmap.context.ImageMultiMapContext;
+import ga.nurupeaches.imgmap.natives.NativeCallbackHandler;
+import ga.nurupeaches.imgmap.natives.NativeVideo;
 import ga.nurupeaches.imgmap.utils.IOHelper;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -34,6 +36,7 @@ public class ImgMapPlugin extends JavaPlugin {
 		loadContexts();
 
 		System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
+		NativeVideo.initialize(NativeCallbackHandler.class);
     }
 
     @Override
