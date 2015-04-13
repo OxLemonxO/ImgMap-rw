@@ -229,7 +229,7 @@ JNIEXPORT jboolean JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_isStre
 	NativeVideoContext* context = getContext(env, jthis, true);
 	if(context == NULL){
     	return false;
-    }
+    }a
 
 	return context->isStreaming;
 }
