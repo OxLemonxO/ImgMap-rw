@@ -49,8 +49,13 @@ public class ImageMultiMapContext extends Context implements MultiMapContext {
 	}
 
 	@Override
-	public short[] getIds(){
+	public short[] getIds() {
 		return ids;
+	}
+
+	@Override
+	public int[] getSizes() {
+		return new int[]{ sizeX, sizeY };
 	}
 
 	// The image is bigger than 128 for MultiMapContexts

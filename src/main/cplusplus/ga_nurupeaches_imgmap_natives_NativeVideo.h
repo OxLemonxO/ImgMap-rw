@@ -9,7 +9,7 @@ extern "C" {
 #endif
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
- * Method:    initHandler
+ * Method:    initialize
  * Signature: (Ljava/lang/Class;)V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize

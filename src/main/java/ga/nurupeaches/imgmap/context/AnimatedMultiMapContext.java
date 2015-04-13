@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -47,6 +48,11 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 	}
 
 	@Override
+	public int[] getSizes() {
+		return new int[]{ sizeX, sizeY };
+	}
+
+	@Override
 	public void startThreads(){
 		streaming = true;
 
@@ -55,7 +61,7 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 			public void run(){
 					// Guarantees that we execute this at LEAST once.
 					do {
-						video.read(null);
+						video.read();
 					} while(streaming);
 			}
 		});
@@ -86,6 +92,11 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 	@Override
 	public void updateContent(Notifiable notifiable, String source, BufferedImage image){
 		video = new NativeVideo(this, sizeX * 128, sizeY * 128);
+		try{
+			video.open(source);
+		} catch (IOException e){
+			e.printStackTrace();
+		}
 
 		MapView view;
 		for(short id : ids){

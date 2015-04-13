@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.map.MapView;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.UUID;
 
 public class AnimatedMapContext extends WatchableContext {
@@ -21,8 +22,12 @@ public class AnimatedMapContext extends WatchableContext {
 	public AnimatedMapContext(String videoSource, short id){
 		this.id = id;
 		view = Bukkit.getMap(id);
-		// TODO: HELP
-		video = new NativeVideo(null, 128, 128);
+		video = new NativeVideo(this, 128, 128);
+		try{
+			video.open(videoSource);
+		} catch (IOException e){
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -33,8 +38,7 @@ public class AnimatedMapContext extends WatchableContext {
 			public void run(){
 				// Guarantees that we execute this at LEAST once.
 				do {
-					// TODO: HELP
-//					video.read();
+					video.read();
 					try{
 						Thread.sleep(12);
 					} catch (InterruptedException e){

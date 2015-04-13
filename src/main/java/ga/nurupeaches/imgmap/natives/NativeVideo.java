@@ -10,8 +10,8 @@ public class NativeVideo {
 	public static native void initialize(Class<? extends CallbackHandler> klass);
 	private native void _init(int width, int height);
 	private native int _open(String source);
+	private native void read(NativeCallbackHandler handler);
 
-	public native void read(NativeCallbackHandler handler);
 	public native boolean isStreaming();
 	public native void close();
 
@@ -26,6 +26,10 @@ public class NativeVideo {
 	protected NativeVideo(NativeCallbackHandler created, int width, int height){
 		handler = created;
 		_init(width, height);
+	}
+
+	public void read(){
+		read(handler);
 	}
 
 	public void open(String source) throws IOException {
