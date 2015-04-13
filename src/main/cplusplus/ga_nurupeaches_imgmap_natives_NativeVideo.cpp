@@ -45,11 +45,19 @@ struct NativeVideoContext {
 	struct SwsContext* imgConvertContext;
 };
 
+struct Hasher {
+
+	std::size_t operator()(const jobject& k) const {
+		return 0;
+	}
+
+};
+
 // bool to represent whether or not we initialized avcodec and co. already.
 bool initialized;
 
 // "Global" map for relating NativeVideos (jobject) to NativeVideoContexts
-std::unordered_map<jobject, NativeVideoContext> LOOKUP_MAP;
+std::unordered_map<jobject, NativeVideoContext, Hasher> LOOKUP_MAP;
 
 // Caching the jmethodID
 jmethodID id;
@@ -69,7 +77,7 @@ inline string convString(JNIEnv* env, jstring jstr){
 }
 
 NativeVideoContext* getContext(JNIEnv* env, jobject jthis, bool throwException){
-	std::unordered_map<jobject, NativeVideoContext>::const_iterator pair = LOOKUP_MAP.find(jthis);
+	std::unordered_map<jobject, NativeVideoContext, Hasher>::const_iterator pair = LOOKUP_MAP.find(jthis);
 
 	if(pair == LOOKUP_MAP.end()){
 		if(throwException){
@@ -94,10 +102,10 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 	avcodec_register_all();
 	avformat_network_init();
 
-   	id = env->GetMethodID(handlerClass, "handleData", "(Lga/nurupeaches/imgmap/natives/NativeVideo;[B)V");
+   	id = env->GetMethodID(handlerClass, "handleData", "([B)V");
    	if(!id){
 		env->ThrowNew(env->FindClass("java.lang.invoke.WrongMethodTypeException"), "Failed to locate handleMethod"
-		"for the given class");
+			"for the given class");
 		return;
    	}
 }
@@ -105,10 +113,11 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 /*
  * Natively initializes a NativeVideo.
  */
-JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_init(JNIEnv* env, jobject jthis, jint width, jint height){
+JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNIEnv* env, jobject jthis, jint width, jint height){
 	NativeVideoContext* context = getContext(env, jthis, false);
 	if(context == NULL){
-		context = new NativeVideoContext();
+		context = new NativeVideoContext;
+		LOOKUP_MAP.emplace(jthis, context);
 	}
 	context->width = width;
 	context->height = height;
@@ -128,7 +137,7 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_init(JNIEn
  * Also can throw:
  * 		IOException - If the NativeVideo never called init(int, int) for whatever reason.
  */
-JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_open(JNIEnv* env, jobject jthis, jstring source){
+JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNIEnv* env, jobject jthis, jstring source){
 	NativeVideoContext* context = getContext(env, jthis, true);
 	if(context == NULL){
 		return 1;
