@@ -45,19 +45,11 @@ struct NativeVideoContext {
 	struct SwsContext* imgConvertContext;
 };
 
-struct Hasher {
-
-	std::size_t operator()(const jobject& k) const {
-		return 0;
-	}
-
-};
-
 // bool to represent whether or not we initialized avcodec and co. already.
 bool initialized;
 
 // "Global" map for relating NativeVideos (jobject) to NativeVideoContexts
-std::unordered_map<jobject, NativeVideoContext, Hasher> LOOKUP_MAP;
+std::unordered_map<unsigned long int, NativeVideoContext, Hasher> LOOKUP_MAP;
 
 // Caching the jmethodID
 jmethodID id;
@@ -77,7 +69,7 @@ inline string convString(JNIEnv* env, jstring jstr){
 }
 
 NativeVideoContext* getContext(JNIEnv* env, jobject jthis, bool throwException){
-	std::unordered_map<jobject, NativeVideoContext, Hasher>::const_iterator pair = LOOKUP_MAP.find(jthis);
+	std::unordered_map<unsigned long int, NativeVideoContext, Hasher>::const_iterator pair = LOOKUP_MAP.find(unsigned long int)&jthis);
 
 	if(pair == LOOKUP_MAP.end()){
 		if(throwException){
@@ -117,7 +109,7 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNI
 	NativeVideoContext* context = getContext(env, jthis, false);
 	if(context == NULL){
 		context = new NativeVideoContext;
-		LOOKUP_MAP.emplace(jthis, context);
+		LOOKUP_MAP.emplace((unsigned long int)&jthis, context);
 	}
 	context->width = width;
 	context->height = height;
