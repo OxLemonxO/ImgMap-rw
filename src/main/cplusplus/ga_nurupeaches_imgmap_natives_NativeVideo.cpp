@@ -2,6 +2,9 @@
 
 #include <unordered_map>
 #include <string>
+#include <stdio.h>
+#include <jvmti.h>
+#include <iostream>
 
 extern "C" {
 	#include "libavcodec/avcodec.h"
@@ -49,10 +52,13 @@ struct NativeVideoContext {
 bool initialized;
 
 // "Global" map for relating NativeVideos (jobject) to NativeVideoContexts
-std::unordered_map<unsigned long int, NativeVideoContext, Hasher> LOOKUP_MAP;
+//std::unordered_map<unsigned long long, NativeVideoContext*> LOOKUP_MAP;
 
 // Caching the jmethodID
 jmethodID id;
+
+// JVMTI "global" pointer.
+jvmtiEnv* jvmti = NULL;
 
 inline void doCallback(JNIEnv* env, jobject callback, jbyteArray arr){
 	env->CallVoidMethod(callback, id, arr);
@@ -68,19 +74,56 @@ inline string convString(JNIEnv* env, jstring jstr){
 	return cStr;
 }
 
-NativeVideoContext* getContext(JNIEnv* env, jobject jthis, bool throwException){
-	std::unordered_map<unsigned long int, NativeVideoContext, Hasher>::const_iterator pair = LOOKUP_MAP.find(unsigned long int)&jthis);
+inline void checkJVMTI(JNIEnv* env){
+	if(jvmti == NULL){
+		JavaVM* vm_ptr;
+		env->GetJavaVM((JavaVM**)&vm_ptr);
+		vm_ptr->GetEnv((void**)&jvmti, (jint)JVMTI_VERSION_1_0);
+		jvmtiCapabilities capabilities;
+		(void) memset(&capabilities, 0, sizeof(jvmtiCapabilities));
+		capabilities.can_tag_objects = 1;
+		jvmtiError err = jvmti->AddCapabilities(&capabilities);
+		printf("err AddCapabilities: %d\n", (int)err);
+		fflush(stdout);
+	}
+}
 
-	if(pair == LOOKUP_MAP.end()){
+jlong* getTag(JNIEnv* env, jobject obj){
+	checkJVMTI(env);
+	jlong* tag_ptr;
+	jvmti->GetTag(obj, tag_ptr);
+	if(tag_ptr == NULL){
+		return 0;
+	} else {
+		return tag_ptr;
+	}
+}
+
+void setTag(JNIEnv* env, jobject obj, unsigned long long tag){
+	checkJVMTI(env);
+	jvmti->SetTag(obj, tag);
+}
+
+/*
+  jvmtiError GetTag(jobject object, jlong* tag_ptr);
+  jvmtiError SetTag(jobject object, jlong tag);
+*/
+
+NativeVideoContext* getContext(JNIEnv* env, jobject jthis, bool throwException){
+//	std::unordered_map<unsigned long long, NativeVideoContext*>::const_iterator pair = LOOKUP_MAP.find((unsigned long long)jthis);
+
+//	if(pair == LOOKUP_MAP.end()){
+	jlong* tag_ptr = getTag(env, jthis);
+	printf("tag_ptr=%lld", (unsigned long long)*tag_ptr);
+	if(tag_ptr == NULL){
 		if(throwException){
 			env->ThrowNew(env->FindClass("java/io/IOException"), "Failed to find a NativeVideoContext associated with "
 				"this object. Perhaps something slipped and we didn't call init(int, int) first? I don't know, but this "
 				"is a long error message. Why? Because I can!");
 		}
-
 		return NULL;
 	} else {
-		return (NativeVideoContext*)&(pair->second);
+		return (NativeVideoContext*)&(tag_ptr);
 	}
 }
 
@@ -100,17 +143,35 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 			"for the given class");
 		return;
    	}
+
+		printf("init'd\n");
+		fflush(stdout);
 }
 
 /*
  * Natively initializes a NativeVideo.
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNIEnv* env, jobject jthis, jint width, jint height){
+			printf("calling _init proto\n");
+        	fflush(stdout);
 	NativeVideoContext* context = getContext(env, jthis, false);
+			printf("got context, null or not\n");
+            fflush(stdout);
 	if(context == NULL){
-		context = new NativeVideoContext;
-		LOOKUP_MAP.emplace((unsigned long int)&jthis, context);
+			printf("null context\n");
+            fflush(stdout);
+		context = new NativeVideoContext();
+			printf("setting tags now\n");
+            fflush(stdout);
+		setTag(env, jthis, (unsigned long long)context);
+			printf("tagged\n");
+        	fflush(stdout);
+	} else {
+			printf("found context?\n");
+        	fflush(stdout);
 	}
+			printf("setting dimensions\n");
+            fflush(stdout);
 	context->width = width;
 	context->height = height;
 }

@@ -1,4 +1,4 @@
-CXX=g++ -fPIC -pedantic -std=c++11
+CXX=g++ -fPIC -pedantic -std=c++11 -m64
 
 ifeq ($(OS),Windows_NT)
     CXX_INCLUDES=-I"C:/Program Files/Java/jdk1.8.0_31/include" -I"C:/Program Files/Java/jdk1.8.0_31/include/win32" -I"C:/FFmpeg/include"

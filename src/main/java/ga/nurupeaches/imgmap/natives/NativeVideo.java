@@ -18,8 +18,7 @@ public class NativeVideo {
 	private final NativeCallbackHandler handler;
 
 	public NativeVideo(Context context, int width, int height){
-		handler = new NativeCallbackHandler(context);
-		_init(width, height);
+		this(new NativeCallbackHandler(context), width, height);
 	}
 
 	// For when we debug this thing.
