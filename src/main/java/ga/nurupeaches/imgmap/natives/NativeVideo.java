@@ -10,19 +10,19 @@ public class NativeVideo {
 	public static native void initialize(Class<? extends CallbackHandler> klass);
 	private native void _init(int width, int height);
 	private native int _open(String source);
-	private native void read(NativeCallbackHandler handler);
+	private native void read(CallbackHandler handler);
 
 	public native boolean isStreaming();
 	public native void close();
 
-	private final NativeCallbackHandler handler;
+	private final CallbackHandler handler;
 
 	public NativeVideo(Context context, int width, int height){
 		this(new NativeCallbackHandler(context), width, height);
 	}
 
 	// For when we debug this thing.
-	protected NativeVideo(NativeCallbackHandler created, int width, int height){
+	protected NativeVideo(CallbackHandler created, int width, int height){
 		handler = created;
 		_init(width, height);
 	}

@@ -34,7 +34,7 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    read
- * Signature: (Lga/nurupeaches/imgmap/natives/NativeCallbackHandler;)V
+ * Signature: (Lga/nurupeaches/imgmap/natives/CallbackHandler;)V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read
   (JNIEnv *, jobject, jobject);

@@ -1,4 +1,4 @@
-CXX=g++ -fPIC -pedantic -std=c++11 -m64
+CXX=g++ -fPIC -pedantic -std=c++11 -m64 -Wall
 
 ifeq ($(OS),Windows_NT)
     CXX_INCLUDES=-I"C:/Program Files/Java/jdk1.8.0_31/include" -I"C:/Program Files/Java/jdk1.8.0_31/include/win32" -I"C:/FFmpeg/include"
@@ -10,7 +10,7 @@ else
     EXPORT_FILE=libNativeVideo.so
 endif
 
-CXXFLAGS=-Wall -g $(CXX_fFMPEG_INCLUDES)
+CXXFLAGS=-g $(CXX_fFMPEG_INCLUDES)
 
 libNativeVideo.so : ga_nurupeaches_imgmap_natives_NativeVideo.o
 	$(CXX) $(CXXFLAGS) $(CXX_FFMPEG_LIBS) -shared -o $(EXPORT_FILE) ga_nurupeaches_imgmap_natives_NativeVideo.o
