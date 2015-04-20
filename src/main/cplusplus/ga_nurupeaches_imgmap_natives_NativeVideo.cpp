@@ -280,6 +280,7 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNI
 
 	std::cout << "_open: init buffers" << std::endl;
     int memorySpace = avpicture_get_size(PIX_FMT_RGB24, context->width, context->height);
+    std::cout << "_open: reserving " << memorySpace << " bytes of memory for our buffer and etc." << std::endl;
 	context->bufferSize = memorySpace;
 	context->rgbFrameBuffer = (uint8_t*)av_malloc(memorySpace * sizeof(uint8_t));
 	avpicture_fill((AVPicture*)context->rgbFrame, context->rgbFrameBuffer, PIX_FMT_RGB24, context->width, context->height);
