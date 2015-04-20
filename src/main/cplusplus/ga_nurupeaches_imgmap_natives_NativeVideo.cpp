@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <jvmti.h>
 #include <iostream>
+#include <typeinfo>
 
 extern "C" {
 	#include "libavcodec/avcodec.h"
@@ -61,9 +62,7 @@ JavaVM* jvm = NULL;
 // method ID for handleData(byte[])
 jmethodID id;
 
-inline void doCallback(jobject callback, jbyteArray arr){
-	JNIEnv* env;
-	jvm->AttachCurrentThread((void**)&env, NULL);
+inline void doCallback(JNIEnv* env, jobject callback, jbyteArray arr){
 	env->CallVoidMethod(callback, id, arr);
 }
 
@@ -323,8 +322,12 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEn
 	}
 
 //	std::cout << "read: init final returning" << std::endl;
+
+	std::cout << "before: javaArray@" << &(context->javaArray) << ";typeid=" << typeid(context->javaArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
 	env->SetByteArrayRegion(context->javaArray, 0, context->bufferSize, (jbyte*)(context->rgbFrame->data[0]));
-    doCallback(callback, context->javaArray);
+	std::cout << "after: javaArray@" << &(context->javaArray) << ";typeid=" << typeid(context->javaArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
+    doCallback(env, callback, context->javaArray);
+	std::cout << "way after: javaArray@" << &(context->javaArray) << ";typeid=" << typeid(context->javaArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
 }
 
 JNIEXPORT jboolean JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_isStreaming(JNIEnv* env, jobject jthis){
@@ -352,7 +355,6 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close(JNIE
 	sws_freeContext(context->imgConvertContext);
 	env->DeleteLocalRef(context->javaArray);
 	context->isStreaming = false;
-	// do closing stuff
 }
 
 #ifdef __cplusplus
