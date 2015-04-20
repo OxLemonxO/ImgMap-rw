@@ -100,24 +100,24 @@ inline void checkJVMTI(){
 }
 
 jlong getTag(jobject obj){
-	std::cout << "entry@getTag: checking jvmti" << std::endl;
+//	std::cout << "entry@getTag: checking jvmti" << std::endl;
 	checkJVMTI();
 	jlong tag = 0;
 	jvmtiError err = jvmti->GetTag(obj, &tag);
 	jvmtiErrorCheck(err, "getTag");
 	if(tag == 0){
-		std::cout << "tag@getTag: null" << std::endl;
+//		std::cout << "tag@getTag: null" << std::endl;
 		return 0;
 	} else {
-		std::cout << "tag@getTag: " << ((long long)tag) << std::endl;
+//		std::cout << "tag@getTag: " << ((long long)tag) << std::endl;
 		return tag;
 	}
 }
 
 void setTag(jobject obj, long long tag){
-	std::cout << "entry@setTag: checking jvmti" << std::endl;
+//	std::cout << "entry@setTag: checking jvmti" << std::endl;
 	checkJVMTI();
-	std::cout << "tag@setTag: " << ((long long)tag) << std::endl;
+//	std::cout << "tag@setTag: " << ((long long)tag) << std::endl;
 	jvmtiError err = jvmti->SetTag(obj, (jlong)tag);
 	jvmtiErrorCheck(err, "setTag");
 }
@@ -298,20 +298,20 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEn
 		return;
 	}
 
-	std::cout << "read: reading frame" << std::endl;
+//	std::cout << "read: reading frame" << std::endl;
 	while(av_read_frame(context->formatContext, &(context->packet)) >= 0){
-		std::cout << "read: recv packet" << std::endl;
+//		std::cout << "read: recv packet" << std::endl;
 		if(context->packet.stream_index == context->videoStreamId){
-			std::cout << "read: recv video packet" << std::endl;
+//			std::cout << "read: recv video packet" << std::endl;
 			avcodec_decode_video2(context->codecContext, context->rawFrame, &(context->frameFinished), &(context->packet));
-			std::cout << "read: decoded video" << std::endl;
+//			std::cout << "read: decoded video" << std::endl;
 
 			if(context->frameFinished){
-				std::cout << "read: finished frame; scaling" << std::endl;
+//				std::cout << "read: finished frame; scaling" << std::endl;
 				sws_scale(context->imgConvertContext, (const uint8_t* const*)context->rawFrame->data,
 							context->rawFrame->linesize, 0, context->codecContext->height,
             				context->rgbFrame->data, context->rgbFrame->linesize);
-				std::cout << "read: scaled image; freeing packet and breaking loop" << std::endl;
+//				std::cout << "read: scaled image; freeing packet and breaking loop" << std::endl;
 
 				av_free_packet(&(context->packet));
 				break;
@@ -321,7 +321,7 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEn
 		av_free_packet(&(context->packet));
 	}
 
-	std::cout << "read: init final returning" << std::endl;
+//	std::cout << "read: init final returning" << std::endl;
 	env->SetByteArrayRegion(context->javaArray, 0, context->bufferSize, (jbyte*)(context->rgbFrame->data[0]));
     doCallback(callback, context->javaArray);
 }

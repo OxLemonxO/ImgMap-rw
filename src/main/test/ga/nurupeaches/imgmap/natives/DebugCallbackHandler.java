@@ -5,22 +5,19 @@ import java.awt.image.DataBufferByte;
 
 public class DebugCallbackHandler extends NativeCallbackHandler {
 
-	private byte[] rawImage;
-	public BufferedImage image;
+	public final BufferedImage image;
+	private final byte[] rawImage;
 
-	public DebugCallbackHandler(){
+	public DebugCallbackHandler(int x, int y){
 		super(null);
+		image = new BufferedImage(x, y, BufferedImage.TYPE_3BYTE_BGR);
+		rawImage = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
 	}
 
 	// Called by JNI
 	@Override
 	public void handleData(byte[] data){
-		if(image == null){
-			image = new BufferedImage(1280, 720, BufferedImage.TYPE_3BYTE_BGR);
-			rawImage = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
-		}
-
-		System.arraycopy(data, 0, rawImage, 0, rawImage.length);
+		System.arraycopy(data, 0, rawImage, 0, data.length);
 	}
 
 }
