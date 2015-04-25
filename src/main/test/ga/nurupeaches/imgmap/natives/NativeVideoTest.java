@@ -1,37 +1,80 @@
-	package ga.nurupeaches.imgmap.natives;
+package ga.nurupeaches.imgmap.natives;
 
-	import ga.nurupeaches.imgmap.utils.YTRegexHelper;
+import ga.nurupeaches.imgmap.utils.YTRegexHelper;
 
-	import java.io.IOException;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-	public class NativeVideoTest {
+public class NativeVideoTest {
 
-		public static final int WIDTH = 0, HEIGHT = 0;
-		public static final String videoPath = YTRegexHelper.getDirectLinks("rnQBF2CIygg").get(0);
-		private NativeVideo video;
+	public static final int WIDTH = 1280, HEIGHT = 720;
+	public static final String videoPath = YTRegexHelper.getDirectLinks("rnQBF2CIygg").get(0);
+	private NativeVideo video;
 
-		public static void main(String[] args) throws Exception {
-			System.load("/home/tsunko/Gunvarrel/ImgMap-rw/src/main/cplusplus/libNativeVideo.so");
-			NativeVideo.initialize(DebugCallbackHandler.class);
+	private final BufferedImage image;
+	private final JFrame frame = new JFrame("libNativeVideo.so - DBGPlayer");
+	private final JPanel panel = new JPanel(){
 
-			NativeVideoTest test = new NativeVideoTest();
-			test.nativeWork();
-		}
-
-		public NativeVideoTest() throws IOException {
-			video = new NativeVideo(new DebugCallbackHandler(1280, 720), WIDTH, HEIGHT);
-		}
-
-		public void nativeWork() throws InterruptedException {
-			try{
-				video.open(videoPath);
-			} catch (Exception e) {
-				e.printStackTrace();
+		@Override
+		public void paintComponent(Graphics g){
+			synchronized(image){
+				g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
 			}
-
-			video.read();
-			new Thread().start();
-			video.read(); // Returns 0 length array.
 		}
 
+		@Override
+		public void repaint() {
+			super.repaint();
+		}
+	};
+
+	public static void main(String[] args) throws Exception {
+		System.load("/home/tsunko/Gunvarrel/ImgMap-rw/src/main/cplusplus/libNativeVideo.so");
+		NativeVideo.initialize(DebugCallbackHandler.class);
+
+		NativeVideoTest test = new NativeVideoTest();
+		test.showGUI();
+		test.startNativeThread();
 	}
+
+	public NativeVideoTest() throws IOException {
+		video = new NativeVideo(new DebugCallbackHandler(this), WIDTH, HEIGHT);
+		image = video.getFrame();
+	}
+
+	public void startNativeThread() throws InterruptedException {
+		try{
+			video.open(videoPath);
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+
+
+
+		Timer displayTimer = new Timer(33, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				video.read();
+				panel.repaint();
+			}
+		});
+		displayTimer.start();
+
+		synchronized(this){
+			wait();
+		}
+		video.close();
+	}
+
+	public void showGUI(){
+		frame.setSize(1280, 720);
+		frame.setContentPane(panel);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+	}
+
+}

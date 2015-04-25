@@ -18,10 +18,10 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo
  * Method:    _init
- * Signature: (II)V
+ * Signature: (Ljava/nio/ByteBuffer;II)V
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init
-  (JNIEnv *, jobject, jint, jint);
+  (JNIEnv *, jobject, jobject, jint, jint);
 
 /*
  * Class:     ga_nurupeaches_imgmap_natives_NativeVideo

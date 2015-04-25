@@ -33,8 +33,8 @@ struct NativeVideoContext {
 	AVFrame* rgbFrame;
 	uint8_t* rgbFrameBuffer; // Buffer for avcodec to use.
 	int bufferSize; // Buffer size (without sizeof(uint8_t))
-	jbyteArray javaArray; // Java array; initialized here instead of every single time we call read(). Which was totally
-						  // a great design idea. Way to go me.
+	char* dbbArray; // Direct ByteBuffer array; initialized here instead of every single time we call read(). Which was totally
+				  // a great design idea. Way to go me.
 
 	// The ID of the video stream we want to get frames from. It's normally the first video stream found.
 	int videoStreamId;
@@ -62,8 +62,8 @@ JavaVM* jvm = NULL;
 // method ID for handleData(byte[])
 jmethodID id;
 
-inline void doCallback(JNIEnv* env, jobject callback, jbyteArray arr){
-	env->CallVoidMethod(callback, id, arr);
+inline void doCallback(JNIEnv* env, jobject callback){
+	env->CallVoidMethod(callback, id);
 }
 
 /*
@@ -99,24 +99,24 @@ inline void checkJVMTI(){
 }
 
 jlong getTag(jobject obj){
-	std::cout << "entry@getTag: checking jvmti" << std::endl;
+//	std::cout << "entry@getTag: checking jvmti" << std::endl;
 	checkJVMTI();
 	jlong tag = 0;
 	jvmtiError err = jvmti->GetTag(obj, &tag);
 	jvmtiErrorCheck(err, "getTag");
 	if(tag == 0){
-		std::cout << "tag@getTag: null" << std::endl;
+//		std::cout << "tag@getTag: null" << std::endl;
 		return 0;
 	} else {
-		std::cout << "tag@getTag: " << ((long long)tag) << std::endl;
+//		std::cout << "tag@getTag: " << ((long long)tag) << std::endl;
 		return tag;
 	}
 }
 
 void setTag(jobject obj, long long tag){
-	std::cout << "entry@setTag: checking jvmti" << std::endl;
+//	std::cout << "entry@setTag: checking jvmti" << std::endl;
 	checkJVMTI();
-	std::cout << "tag@setTag: " << ((long long)tag) << std::endl;
+//	std::cout << "tag@setTag: " << ((long long)tag) << std::endl;
 	jvmtiError err = jvmti->SetTag(obj, (jlong)tag);
 	jvmtiErrorCheck(err, "setTag");
 }
@@ -152,7 +152,7 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 	avformat_network_init();
 	env->GetJavaVM((JavaVM**)&jvm);
 
-   	id = env->GetMethodID(handlerClass, "handleData", "([B)V");
+   	id = env->GetMethodID(handlerClass, "handleData", "()V");
    	if(!id){
 		env->ThrowNew(env->FindClass("java.lang.invoke.WrongMethodTypeException"), "Failed to locate handleMethod"
 			"for the given class");
@@ -165,12 +165,15 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 /*
  * Natively initializes a NativeVideo.
  */
-JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNIEnv* env, jobject jthis, jint width, jint height){
+JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNIEnv* env, jobject jthis, jobject buffer, jint width, jint height){
 	NativeVideoContext* context = getContext(env, jthis, false);
 	if(context == NULL){
 		context = new NativeVideoContext;
 		setTag(jthis, (long long)context);
 	}
+
+	context->dbbArray = (char*)env->GetDirectBufferAddress(buffer);
+	context->bufferSize = env->GetDirectBufferCapacity(buffer);
 	context->width = width;
 	context->height = height;
 }
@@ -270,7 +273,7 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNI
 													// target dimensions
 													context->width, context->height,
 													// target pixel format
-													PIX_FMT_BGR24,
+													PIX_FMT_RGB24,
 
 													// rescaling functions and co.
 													SWS_BICUBIC, NULL, NULL, NULL
@@ -278,60 +281,54 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNI
 
 
 	std::cout << "_open: init buffers" << std::endl;
-    int memorySpace = avpicture_get_size(PIX_FMT_RGB24, context->width, context->height);
-    std::cout << "_open: reserving " << memorySpace << " bytes of memory for our buffer and etc." << std::endl;
-	context->bufferSize = memorySpace;
-	context->rgbFrameBuffer = (uint8_t*)av_malloc(memorySpace * sizeof(uint8_t));
+	context->rgbFrameBuffer = (uint8_t*)av_malloc(avpicture_get_size(PIX_FMT_RGB24, context->width, context->height) * sizeof(uint8_t));
 	avpicture_fill((AVPicture*)context->rgbFrame, context->rgbFrameBuffer, PIX_FMT_RGB24, context->width, context->height);
-	context->javaArray = env->NewByteArray(memorySpace);
 	context->isStreaming = true;
 	// Successful opening.
 	return 0;
 }
 
-
-
 /*
  * Reads a frame; calls the callback's callback method when finished.
  */
-	JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEnv* env, jobject jthis, jobject callback){
-		NativeVideoContext* context = getContext(env, jthis, true);
-		if(context == NULL){
-			return;
-		}
-
-		std::cout << "read: reading frame" << std::endl;
-		while(av_read_frame(context->formatContext, &(context->packet)) >= 0){
-			std::cout << "read: recv packet" << std::endl;
-			if(context->packet.stream_index == context->videoStreamId){
-				std::cout << "read: recv video packet" << std::endl;
-				avcodec_decode_video2(context->codecContext, context->rawFrame, &(context->frameFinished), &(context->packet));
-				std::cout << "read: decoded video" << std::endl;
-
-				if(context->frameFinished){
-					std::cout << "read: finished frame; scaling" << std::endl;
-					sws_scale(context->imgConvertContext, (const uint8_t* const*)context->rawFrame->data,
-								context->rawFrame->linesize, 0, context->codecContext->height,
-								context->rgbFrame->data, context->rgbFrame->linesize);
-					std::cout << "read: scaled image; freeing packet and breaking loop" << std::endl;
-
-					av_free_packet(&(context->packet));
-					break;
-				}
-			}
-
-			av_free_packet(&(context->packet));
-		}
-
-		std::cout << "read: init final returning" << std::endl;
-		std::cout << "read: beforeSetByteArrayRegion javaArray@" << &(context->javaArray) << ";typeid=" << typeid(context->javaArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
-		env->SetByteArrayRegion(context->javaArray, 0, context->bufferSize, (jbyte*)(context->rgbFrame->data[0]));
-		doCallback(env, callback, context->javaArray);
-		std::cout << "read: afterSetByteArrayRegion javaArray@" << &(context->javaArray) << ";typeid=" << typeid(context->javaArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
+JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEnv* env, jobject jthis, jobject callback){
+	NativeVideoContext* context = getContext(env, jthis, true);
+	if(context == NULL){
+		return;
 	}
 
+//	std::cout << "read: reading frame" << std::endl;
+	while(av_read_frame(context->formatContext, &(context->packet)) >= 0){
+//		std::cout << "read: recv packet" << std::endl;
+		if(context->packet.stream_index == context->videoStreamId){
+//			std::cout << "read: recv video packet" << std::endl;
+			avcodec_decode_video2(context->codecContext, context->rawFrame, &(context->frameFinished), &(context->packet));
+//			std::cout << "read: decoded video" << std::endl;
+
+			if(context->frameFinished){
+//				std::cout << "read: finished frame; scaling" << std::endl;
+				sws_scale(context->imgConvertContext, (const uint8_t* const*)context->rawFrame->data,
+							context->rawFrame->linesize, 0, context->codecContext->height,
+            				context->rgbFrame->data, context->rgbFrame->linesize);
+//				std::cout << "read: scaled image; freeing packet and breaking loop" << std::endl;
+
+				av_free_packet(&(context->packet));
+				break;
+			}
+		}
+
+		av_free_packet(&(context->packet));
+	}
+
+//	std::cout << "read: init final returning" << std::endl;
+//	std::cout << "read: beforeMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
+	memcpy(context->dbbArray, (jbyte*)(context->rgbFrame->data[0]), context->bufferSize);
+    doCallback(env, callback);
+//	std::cout << "read: afterMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
+}
+
 JNIEXPORT jboolean JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_isStreaming(JNIEnv* env, jobject jthis){
-	NativeVideoContext* context = getContext(env, jthis, true);
+	NativeVideoContext* context = getContext(env, jthis, false);
 	if(context == NULL){
     	return false;
     }
@@ -353,7 +350,7 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close(JNIE
 	av_free(context->codec);
 	av_free_packet(&(context->packet));
 	sws_freeContext(context->imgConvertContext);
-	env->DeleteLocalRef(context->javaArray);
+//	env->DeleteLocalRef(context->javaArray);
 	context->isStreaming = false;
 }
 
