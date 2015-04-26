@@ -1,6 +1,7 @@
 package ga.nurupeaches.imgmap.natives;
 
 import ga.nurupeaches.imgmap.context.Context;
+import io.netty.buffer.ByteBuf;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
@@ -13,8 +14,8 @@ public class NativeVideo {
 
 	// These two methods should not be handled outside of NativeVideo
 	public static native void initialize(Class<? extends CallbackHandler> klass);
-	private native void _init(ByteBuffer buff, int width, int height);
-	private native int _open(String source);
+    private native Object _init(int width, int height);
+    private native int _open(String source);
 	private native void read(CallbackHandler handler);
 
 	public native boolean isStreaming();
@@ -24,20 +25,22 @@ public class NativeVideo {
 	private final CallbackHandler handler;
 
 	public NativeVideo(Context context, int width, int height){
-		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 3);
-		frame = directBufferedImage(buffer, width, height);
+        ByteBuffer buffer = (ByteBuffer)_init(width, height);
+//		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 3);
+
+        frame = directBufferedImage(buffer, width, height);
 		handler = new NativeCallbackHandler(frame, context);
 
-		_init(buffer, width, height);
 	}
 
 	// For when we debug this thing.
 	protected NativeVideo(CallbackHandler created, int width, int height){
-		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 3);
-		frame = directBufferedImage(buffer, width, height);
+        ByteBuffer buffer = (ByteBuffer)_init(width, height);
+//		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 3);
+
+        frame = directBufferedImage(buffer, width, height);
 		handler = created;
 
-		_init(buffer, width, height);
 	}
 
 	public void read(){

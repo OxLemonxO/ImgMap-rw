@@ -1,5 +1,6 @@
 #include "ga_nurupeaches_imgmap_natives_NativeVideo.h"
 
+#include <stdint.h>
 #include <unordered_map>
 #include <string>
 #include <stdio.h>
@@ -165,17 +166,20 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_initialize
 /*
  * Natively initializes a NativeVideo.
  */
-JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNIEnv* env, jobject jthis, jobject buffer, jint width, jint height){
+JNIEXPORT jobject JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1init(JNIEnv* env, jobject jthis, jint width, jint height){
 	NativeVideoContext* context = getContext(env, jthis, false);
 	if(context == NULL){
 		context = new NativeVideoContext;
 		setTag(jthis, (long long)context);
 	}
 
-	context->dbbArray = (char*)env->GetDirectBufferAddress(buffer);
-	context->bufferSize = env->GetDirectBufferCapacity(buffer);
+    int memorySpace = width * height * 3;
+	context->dbbArray = new char[memorySpace];
+    jobject directBuffer = env->NewDirectByteBuffer((void*)context->dbbArray, memorySpace);
+    context->bufferSize = memorySpace;
 	context->width = width;
 	context->height = height;
+	return directBuffer;
 }
 
 /*
@@ -288,6 +292,8 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNI
 	return 0;
 }
 
+bool did = false;
+
 /*
  * Reads a frame; calls the callback's callback method when finished.
  */
@@ -322,7 +328,11 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEn
 
 //	std::cout << "read: init final returning" << std::endl;
 //	std::cout << "read: beforeMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
-	memcpy(context->dbbArray, (jbyte*)(context->rgbFrame->data[0]), context->bufferSize);
+//	memcpy(context->dbbArray, context->rgbFrame->data[0], context->bufferSize);
+    if(!did){
+        context->rgbFrame->data[0] = (unsigned char*)context->dbbArray;
+        did = true;
+    }
     doCallback(env, callback);
 //	std::cout << "read: afterMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
 }

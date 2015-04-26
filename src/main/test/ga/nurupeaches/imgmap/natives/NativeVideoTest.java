@@ -12,7 +12,7 @@ import java.io.IOException;
 public class NativeVideoTest {
 
 	public static final int WIDTH = 1280, HEIGHT = 720;
-	public static final String videoPath = YTRegexHelper.getDirectLinks("rnQBF2CIygg").get(0);
+	public static final String videoPath = YTRegexHelper.getDirectLinks("CpasSV_mw2o").get(0);
 	private NativeVideo video;
 
 	private final BufferedImage image;
@@ -21,9 +21,7 @@ public class NativeVideoTest {
 
 		@Override
 		public void paintComponent(Graphics g){
-			synchronized(image){
-				g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-			}
+			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
 		}
 
 		@Override
@@ -33,8 +31,10 @@ public class NativeVideoTest {
 	};
 
 	public static void main(String[] args) throws Exception {
-		System.load("/home/tsunko/Gunvarrel/ImgMap-rw/src/main/cplusplus/libNativeVideo.so");
-		NativeVideo.initialize(DebugCallbackHandler.class);
+        String libName = (System.getProperty("os.name").toLowerCase().contains("win") ? "NativeVideo.dll" : "libNativeVideo.so");
+        System.load(System.getProperty("user.dir") + "/src/main/cplusplus/" + libName);
+
+        NativeVideo.initialize(DebugCallbackHandler.class);
 
 		NativeVideoTest test = new NativeVideoTest();
 		test.showGUI();
@@ -53,20 +53,12 @@ public class NativeVideoTest {
 			e.printStackTrace();
 		}
 
+        while(video.isStreaming()){
+            video.read();
+            panel.repaint();
+            Thread.sleep(33);
+        }
 
-
-		Timer displayTimer = new Timer(33, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				video.read();
-				panel.repaint();
-			}
-		});
-		displayTimer.start();
-
-		synchronized(this){
-			wait();
-		}
 		video.close();
 	}
 
