@@ -288,6 +288,7 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNI
 	context->rgbFrameBuffer = (uint8_t*)av_malloc(avpicture_get_size(PIX_FMT_RGB24, context->width, context->height) * sizeof(uint8_t));
 	avpicture_fill((AVPicture*)context->rgbFrame, context->rgbFrameBuffer, PIX_FMT_RGB24, context->width, context->height);
 	context->isStreaming = true;
+	context->rgbFrame->data[0] = (unsigned char*)context->dbbArray;
 	// Successful opening.
 	return 0;
 }
@@ -329,10 +330,10 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEn
 //	std::cout << "read: init final returning" << std::endl;
 //	std::cout << "read: beforeMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
 //	memcpy(context->dbbArray, context->rgbFrame->data[0], context->bufferSize);
-    if(!did){
-        context->rgbFrame->data[0] = (unsigned char*)context->dbbArray;
-        did = true;
-    }
+//    if(!did){
+//        context->rgbFrame->data[0] = (unsigned char*)context->dbbArray;
+//        did = true;
+//    }
     doCallback(env, callback);
 //	std::cout << "read: afterMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
 }

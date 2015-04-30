@@ -4,35 +4,41 @@ import ga.nurupeaches.imgmap.utils.YTRegexHelper;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class NativeVideoTest {
+public class NativeVideoTest extends JPanel {
 
 	public static final int WIDTH = 1280, HEIGHT = 720;
-	public static final String videoPath = YTRegexHelper.getDirectLinks("CpasSV_mw2o").get(0);
-	private NativeVideo video;
+	public static final String videoPath = YTRegexHelper.getDirectLinks("rnQBF2CIygg").get(0);
 
+    private final NativeVideo video;
 	private final BufferedImage image;
 	private final JFrame frame = new JFrame("libNativeVideo.so - DBGPlayer");
-	private final JPanel panel = new JPanel(){
 
-		@Override
-		public void paintComponent(Graphics g){
-			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-		}
+    @Override
+    public int getWidth(){
+        return frame.getWidth();
+    }
 
-		@Override
-		public void repaint() {
-			super.repaint();
-		}
-	};
+    @Override
+    public int getHeight(){
+        return frame.getHeight();
+    }
+
+    @Override
+    public void paintComponent(Graphics g){
+        g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+    }
 
 	public static void main(String[] args) throws Exception {
         String libName = (System.getProperty("os.name").toLowerCase().contains("win") ? "NativeVideo.dll" : "libNativeVideo.so");
-        System.load(System.getProperty("user.dir") + "/src/main/cplusplus/" + libName);
+
+        if(System.getProperty("user.dir").contains("ImgMap-rw")) {
+            System.load(System.getProperty("user.dir") + "/src/main/cplusplus/" + libName);
+        } else {
+            System.loadLibrary("NativeVideo");
+        }
 
         NativeVideo.initialize(DebugCallbackHandler.class);
 
@@ -55,16 +61,15 @@ public class NativeVideoTest {
 
         while(video.isStreaming()){
             video.read();
-            panel.repaint();
-            Thread.sleep(33);
+            Thread.sleep(33, 333);
         }
 
 		video.close();
 	}
 
 	public void showGUI(){
-		frame.setSize(1280, 720);
-		frame.setContentPane(panel);
+        frame.setSize(1280, 720);
+		frame.setContentPane(this);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 	}

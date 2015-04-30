@@ -6,18 +6,18 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/main/cplusplus" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/craftbukkit_server.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/PluginTesting/craftbukkit_server.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/Downloads/craftbukkit_server.jar!/" />
+          <root url="jar://$USER_HOME$/Desktop/PluginTesting/craftbukkit_server.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

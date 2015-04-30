@@ -1,7 +1,6 @@
 package ga.nurupeaches.imgmap.natives;
 
 import ga.nurupeaches.imgmap.context.Context;
-import io.netty.buffer.ByteBuf;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
@@ -86,16 +85,10 @@ public class NativeVideo {
 
 		};
 
-		SampleModel sm = new ComponentSampleModel(
-				DataBuffer.TYPE_BYTE,
-				width, height, 3, 3 * width, new int[]{0,1,2});
-
+		SampleModel sm = new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 3, 3 * width, new int[]{0,1,2});
 		WritableRaster raster = new WritableRaster(sm, dataBuffer, new Point()){};
-		ColorModel colorModel = new ComponentColorModel(
-								ColorSpace.getInstance(ColorSpace.CS_sRGB),
-								new int[]{8,8,8}, false, false,
-								Transparency.OPAQUE,
-								DataBuffer.TYPE_BYTE);
+		ColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[]{8,8,8},
+                false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 
 		return new BufferedImage(colorModel, raster, false, null);
 	}

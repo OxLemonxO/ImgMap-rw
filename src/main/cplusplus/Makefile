@@ -1,7 +1,5 @@
-CXX=g++ -fPIC -pedantic -std=c++11 -Wall
-
 ifeq ($(OS),Windows_NT)
-    CXX_INCLUDES=-I"C:/Program Files/Java/jdk1.8.0_31/include" -I"C:/Program Files/Java/jdk1.8.0_31/include/win32" -I"C:/FFmpeg/include"
+    CXX_INCLUDES=-I"C:/Program Files/Java/jdk1.8.0_31/include" -I"C:/Program Files/Java/jdk1.8.0_31/include/win32" -I"C:/FFmpeg/include" -L"C:/FFmpeg/x64/lib"
     CXX_FFMPEG_LIBS=-L"C:/MinGW/lib/gcc/x86_64-w64-mingw32/4.9.2" -lstdc++ -L"C:/FFmpeg/lib" -lavutil -lavformat -lavcodec -lswscale
     EXPORT_FILE=NativeVideo.dll
 else
@@ -10,11 +8,23 @@ else
     EXPORT_FILE=libNativeVideo.so
 endif
 
+CXX=g++ -o $(EXPORT_FILE) -fPIC -pedantic -std=c++11 -Wall
+
 libNativeVideo.so : ga_nurupeaches_imgmap_natives_NativeVideo.o
-	$(CXX) -o $(EXPORT_FILE) ga_nurupeaches_imgmap_natives_NativeVideo.o -shared $(CXX_FFMPEG_LIBS)
+	$(CXX) $(CXX_INCLUDES) $(CXX_FFMPEG_LIBS) ga_nurupeaches_imgmap_natives_NativeVideo.o -shared
 
 ga_nurupeaches_imgmap_natives_NativeVideo.o : ga_nurupeaches_imgmap_natives_NativeVideo.cpp ga_nurupeaches_imgmap_natives_NativeVideo.h
-	$(CXX) -c $(CXX_INCLUDES) ga_nurupeaches_imgmap_natives_NativeVideo.cpp
+	$(CXX) $(CXX_INCLUDES) ga_nurupeaches_imgmap_natives_NativeVideo.cpp
 
 clean :
 	rm -f libNativeVideo.so ga_nurupeaches_imgmap_natives_NativeVideo.o
+
+
+J_ARCH=$(shell java -version)
+
+ifeq($(OS),Windows_NT)
+    CXX_INCLUDES=-I"C:/Program Files/Java/jdk1.8.0_31/include" -I"C:/Program Files/Java/jdk1.8.0_31/include/win32"  -I"C:/FFmpeg/include"
+    CXX_LIBARIES=-L"C:/FFmpeg/x64/lib
+else
+
+endif
