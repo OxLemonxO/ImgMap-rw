@@ -5,13 +5,15 @@ import ga.nurupeaches.imgmap.nms.Adapter;
 import ga.nurupeaches.imgmap.nms.MapPacket;
 import ga.nurupeaches.imgmap.utils.MapUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 public class AnimatedMultiMapContext extends WatchableContext implements MultiMapContext {
 
@@ -21,6 +23,9 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 	private int sizeX, sizeY;
 	private NativeVideo video;
 
+	private List<Callable<MapPacket>> tasks;
+	private ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
 	public AnimatedMultiMapContext(short[] ids, int sizeX, int sizeY){
 		if((sizeX * sizeY) != ids.length){
 			throw new IllegalArgumentException("Given IDs doesn't match the requirement for " + sizeX + "," + sizeY);
@@ -29,6 +34,8 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 		this.ids = ids;
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
+		this.tasks = new ArrayList<Callable<MapPacket>>(sizeX*sizeY);
+		System.out.println(Arrays.toString(ids) + ",x=" + sizeX + ",y=" + sizeY);
 	}
 
 	@Override
@@ -60,9 +67,15 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 			@Override
 			public void run(){
 					// Guarantees that we execute this at LEAST once.
+				try {
 					do {
 						video.read();
+
+						Thread.sleep(33);
 					} while(streaming);
+				} catch (InterruptedException e){
+					e.printStackTrace();
+				}
 			}
 		});
 		nativeThread.start();
@@ -85,12 +98,11 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 	}
 
 	@Override
-	public short getId(){
-		return ids[0];
-	}
-
-	@Override
 	public void updateContent(Notifiable notifiable, String source, BufferedImage image){
+		if(streaming){
+			stopThreads();
+		}
+
 		video = new NativeVideo(this, sizeX * 128, sizeY * 128);
 		try{
 			video.open(source);
@@ -112,33 +124,53 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 	}
 
 	@Override
-	public void update(Object... params){
+	public synchronized void update(Object... params){
 		if(params.length < 1){
 			return;
 		}
 
-		BufferedImage image = (BufferedImage)params[0];
-		Iterator<UUID> uuids = viewers.iterator();
-		MapPacket packet;
-		Player player;
-		UUID uuid;
+		final BufferedImage image = (BufferedImage)params[0];
 		short id;
 		for(int x=0; x < sizeX; x++){
 			for(int y=0; y < sizeY; y++){
 				id = ids[x + sizeX * y];
-				packet = Adapter.convertImageToPackets(id, image.getSubimage(x * 128, y * 128, 128, 128));
-
-				while(uuids.hasNext()){
-					uuid = uuids.next();
-					if((player = Bukkit.getPlayer(uuid)) == null){
-						uuids.remove();
-						continue;
-					}
-
-					packet.send(player);
-				}
+				tasks.add(new GeneratePacketCallable(id, image, x, y));
 			}
 		}
+
+		try{
+			List<Future<MapPacket>> packets = service.invokeAll(tasks);
+			for(Future<MapPacket> futurePacket : packets){
+				for(UUID uuid : viewers){
+					futurePacket.get().send(Bukkit.getPlayer(uuid));
+				}
+			}
+			tasks.clear();
+		} catch (InterruptedException e){
+			e.printStackTrace();
+		} catch (ExecutionException e){
+			e.printStackTrace();
+		}
+	}
+
+	private class GeneratePacketCallable implements Callable<MapPacket> {
+
+		private short id;
+		private BufferedImage image;
+		private int x, y;
+
+		public GeneratePacketCallable(short id, BufferedImage src, int x, int y){
+			this.id = id;
+			this.image = src;
+			this.x = x;
+			this.y = y;
+		}
+
+		@Override
+		public MapPacket call() throws Exception {
+			return Adapter.convertImageToPackets(id, image.getSubimage(x * 128, y * 128, 128, 128));
+		}
+
 	}
 
 }

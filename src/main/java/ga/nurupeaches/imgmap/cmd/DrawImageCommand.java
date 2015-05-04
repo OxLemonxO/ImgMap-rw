@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
+@Deprecated
 public class DrawImageCommand extends CommandHandler {
 
 	public DrawImageCommand(){

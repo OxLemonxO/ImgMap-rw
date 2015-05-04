@@ -14,7 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class ImageMapContext extends Context {
+public class ImageMapContext extends Context implements SingleMapContext {
 
     private short id;
 

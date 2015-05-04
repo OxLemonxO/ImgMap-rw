@@ -1,8 +1,6 @@
 package ga.nurupeaches.imgmap;
 
-import ga.nurupeaches.imgmap.cmd.DrawImageCommand;
-import ga.nurupeaches.imgmap.cmd.DrawVideoCommand;
-import ga.nurupeaches.imgmap.cmd.JoinVideoCommand;
+import ga.nurupeaches.imgmap.cmd.DrawCommand;
 import ga.nurupeaches.imgmap.context.AnimatedMapContext;
 import ga.nurupeaches.imgmap.context.Context;
 import ga.nurupeaches.imgmap.context.ImageMapContext;
@@ -30,9 +28,10 @@ public class ImgMapPlugin extends JavaPlugin {
     @Override
     public void onEnable(){
         SINGLETON = this;
-		getCommand("drawimage").setExecutor(new DrawImageCommand());
-		getCommand("drawvideo").setExecutor(new DrawVideoCommand());
-		getCommand("joinvideo").setExecutor(new JoinVideoCommand());
+		DrawCommand command = new DrawCommand();
+		getCommand("drawimage").setExecutor(command);
+		getCommand("drawvideo").setExecutor(command);
+		getCommand("joinvideo").setExecutor(command);
 		loadContexts();
 
 		System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());

@@ -11,23 +11,17 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.UUID;
 
-public class AnimatedMapContext extends WatchableContext {
+public class AnimatedMapContext extends WatchableContext implements SingleMapContext {
 
 	private MapView view;
 	private Thread nativeThread;
 	private boolean streaming = false;
 	private short id;
-	private final NativeVideo video;
+	private NativeVideo video;
 
-	public AnimatedMapContext(String videoSource, short id){
+	public AnimatedMapContext(short id){
 		this.id = id;
 		view = Bukkit.getMap(id);
-		video = new NativeVideo(this, 128, 128);
-		try{
-			video.open(videoSource);
-		} catch (IOException e){
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -40,7 +34,7 @@ public class AnimatedMapContext extends WatchableContext {
 				do {
 					video.read();
 					try{
-						Thread.sleep(12);
+						Thread.sleep(33);
 					} catch (InterruptedException e){
 						e.printStackTrace();
 					}
@@ -69,6 +63,17 @@ public class AnimatedMapContext extends WatchableContext {
 
 	@Override
 	public void updateContent(Notifiable notifiable, String source, BufferedImage image){
+		if(streaming){
+			stopThreads();
+		}
+
+		video = new NativeVideo(this, 128, 128);
+		try{
+			video.open(source);
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+
 		MapUtils.clearRenderers(view);
 		history.add(source);
 	}
@@ -79,8 +84,7 @@ public class AnimatedMapContext extends WatchableContext {
 			return;
 		}
 
-		BufferedImage resized = (BufferedImage)params[0];
-		MapPacket packet = Adapter.convertImageToPackets(id, resized);
+		MapPacket packet = Adapter.convertImageToPackets(id, (BufferedImage)params[0]);
 		for(UUID uuid : viewers){
 			packet.send(Bukkit.getPlayer(uuid));
 		}

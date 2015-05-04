@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+@Deprecated
 public class DrawVideoCommand extends CommandHandler {
 
 	public DrawVideoCommand(){
@@ -51,14 +52,14 @@ public class DrawVideoCommand extends CommandHandler {
 			}
 
 			AnimatedMultiMapContext newContext = (AnimatedMultiMapContext)context;
-			if(newContext.getVideo().isStreaming()){
+			if(newContext.getVideo() != null && newContext.getVideo().isStreaming()){
 				newContext.stopThreads();
 			}
 			newContext.updateSizes(x, y);
 			newContext.updateIds(ids);
 		} else {
 			if(!(context instanceof AnimatedMapContext)){
-				context = new AnimatedMapContext(url, stack.getDurability());
+				context = new AnimatedMapContext(stack.getDurability());
 			}
 		}
 

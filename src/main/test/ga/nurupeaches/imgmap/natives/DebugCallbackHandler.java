@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 
 public class DebugCallbackHandler implements CallbackHandler {
 
-    private final NativeVideoTest test;
+    private final SwingNativeVideoTest test;
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private final Runnable redrawRunnable = new Runnable() {
 
@@ -18,7 +18,7 @@ public class DebugCallbackHandler implements CallbackHandler {
     };
     private Future<?> redraw;
 
-	public DebugCallbackHandler(NativeVideoTest test){
+	public DebugCallbackHandler(SwingNativeVideoTest test){
 		this.test = test;
 	}
 

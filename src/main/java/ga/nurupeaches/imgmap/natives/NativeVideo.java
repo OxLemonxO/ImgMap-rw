@@ -25,18 +25,13 @@ public class NativeVideo {
 
 	public NativeVideo(Context context, int width, int height){
         ByteBuffer buffer = (ByteBuffer)_init(width, height);
-//		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 3);
-
         frame = directBufferedImage(buffer, width, height);
 		handler = new NativeCallbackHandler(frame, context);
-
 	}
 
 	// For when we debug this thing.
 	protected NativeVideo(CallbackHandler created, int width, int height){
         ByteBuffer buffer = (ByteBuffer)_init(width, height);
-//		ByteBuffer buffer = ByteBuffer.allocateDirect(width * height * 3);
-
         frame = directBufferedImage(buffer, width, height);
 		handler = created;
 

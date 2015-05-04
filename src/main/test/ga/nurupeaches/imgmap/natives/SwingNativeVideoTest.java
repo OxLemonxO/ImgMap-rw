@@ -7,10 +7,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class NativeVideoTest extends JPanel {
+public class SwingNativeVideoTest extends JPanel {
 
 	public static final int WIDTH = 1280, HEIGHT = 720;
-	public static final String videoPath = YTRegexHelper.getDirectLinks("rnQBF2CIygg").get(0);
+	public static final String videoPath = YTRegexHelper.getDirectLinks("HphwQNhByOk").get(0);
 
     private final NativeVideo video;
 	private final BufferedImage image;
@@ -42,12 +42,12 @@ public class NativeVideoTest extends JPanel {
 
         NativeVideo.initialize(DebugCallbackHandler.class);
 
-		NativeVideoTest test = new NativeVideoTest();
+		SwingNativeVideoTest test = new SwingNativeVideoTest();
 		test.showGUI();
 		test.startNativeThread();
 	}
 
-	public NativeVideoTest() throws IOException {
+	public SwingNativeVideoTest() throws IOException {
 		video = new NativeVideo(new DebugCallbackHandler(this), WIDTH, HEIGHT);
 		image = video.getFrame();
 	}

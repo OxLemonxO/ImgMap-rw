@@ -1,25 +1,35 @@
 package ga.nurupeaches.imgmap.nms.v1_8_R2;
 
+import com.google.common.collect.BiMap;
+import ga.nurupeaches.imgmap.ImgMapPlugin;
 import ga.nurupeaches.imgmap.nms.Adapter;
 import ga.nurupeaches.imgmap.nms.MapPacket;
+import ga.nurupeaches.imgmap.nms.ProxyBiMap;
 import net.minecraft.server.v1_8_R2.*;
 import org.bukkit.craftbukkit.v1_8_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R2.entity.CraftPlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 public class AdapterImpl extends Adapter {
 
-	private static final List<MapIcon> DUMMY_LIST = Collections.unmodifiableList(new ArrayList<MapIcon>());
+	public static final int CACHE_SIZE = 50;
+	private Map<Short, MapPacket> cache = new HashMap<Short, MapPacket>(CACHE_SIZE);
 
 	@Override
 	protected MapPacket _generatePacket(short id, byte[] data) {
-		return new MapPacketImpl(id, data);
+		if(Adapter.INJECTED){
+			MapPacket packet = cache.get(id);
+			if(packet == null){
+				cache.put(id, packet = new MapPacketImpl(id, data));
+			}
+			return packet.setData(data);
+		} else {
+			return new MapPacketImpl(id, data);
+		}
 	}
 
 	@Override
@@ -39,76 +49,30 @@ public class AdapterImpl extends Adapter {
 		return worldmap.mapView;
 	}
 
-	public class MapPacketImpl implements MapPacket {
-
-		private PacketPlayOutMap packet;
-
-		// new PacketPlayOutMap(map.getId(), map.getScale().getValue(), icons, data.buffer, 0, 0, 0, 0);
-		MapPacketImpl(short id, byte[] data){
-			packet = new PacketPlayOutMap(id, MapView.Scale.FARTHEST.getValue(), DUMMY_LIST, data, 0, 0, 128, 128);
+	@Override
+	public boolean _injectPacket(){
+		try{
+			addPacket(EnumProtocol.PLAY, PacketPlayOutMapNoLoop.class);
+		} catch (Throwable t){
+			ImgMapPlugin.logger().log(Level.WARNING, "Failed to inject", t);
+			return false;
 		}
-
-		@Override
-		public void setData(byte[] data){
-//			packet.setH(data);
-		}
-
-		@Override
-		public void send(Player player){
-			if(!(player instanceof CraftPlayer)){
-				throw new IllegalArgumentException("Player wasn't a CraftPlayer!");
-			}
-
-			((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
-		}
-
+		return true;
 	}
 
-	public class ConstructorSkipNMSMapPacket extends PacketPlayOutMap {
 
-		private int a;
-		private byte b;
-		private int d;
-		private int e;
-		private int f;
-		private int g;
-		private byte[] h;
+	private static void addPacket(EnumProtocol protocol, Class<? extends Packet> packet) throws NoSuchFieldException, IllegalAccessException {
+		Field packets = EnumProtocol.class.getDeclaredField("j");
+		packets.setAccessible(true);
+		Map<EnumProtocolDirection, BiMap<Integer, Class<? extends Packet>>> pMap = (Map<EnumProtocolDirection, BiMap<Integer, Class<? extends Packet>>>)packets.get(protocol);
+		ProxyBiMap newPacketMap = new ProxyBiMap<Integer, Class<? extends Packet>>(pMap.get(EnumProtocolDirection.CLIENTBOUND));
+		newPacketMap.addProxy(PacketPlayOutMap.class, PacketPlayOutMapNoLoop.class);
+		pMap.put(EnumProtocolDirection.CLIENTBOUND, newPacketMap);
 
-		public ConstructorSkipNMSMapPacket(int id, byte view, byte[] elements, int minX, int minY, int maxX, int maxY) {
-			super();
-			a = id;
-			b = view;
-			d = minX;
-			e = minY;
-			f = maxX;
-			g = maxY;
-			h = elements;
-		}
-
-		public void setH(byte[] data){
-			this.h = data;
-		}
-
-		@Override
-		public void b(PacketDataSerializer serializer) throws IOException {
-			serializer.b(this.a);
-			serializer.writeByte(this.b);
-			serializer.b(0); // Write 0 since there isn't a MapIcon we use.
-
-			serializer.writeByte(this.f);
-			if(this.f > 0) {
-				serializer.writeByte(this.g);
-				serializer.writeByte(this.d);
-				serializer.writeByte(this.e);
-				serializer.a(this.h);
-			}
-		}
-
-		@Override
-		public void a(PacketListenerPlayOut listener) {
-			listener.a(this);
-		}
-
+		Field map = EnumProtocol.class.getDeclaredField("h");
+		map.setAccessible(true);
+		Map<Class<? extends Packet>, EnumProtocol> protocolMap = (Map)map.get(null);
+		protocolMap.put(packet, protocol);
 	}
 
 }

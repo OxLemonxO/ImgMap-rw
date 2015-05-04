@@ -293,19 +293,18 @@ JNIEXPORT jint JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo__1open(JNI
 	return 0;
 }
 
-bool did = false;
-
 /*
  * Reads a frame; calls the callback's callback method when finished.
  */
 JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEnv* env, jobject jthis, jobject callback){
 	NativeVideoContext* context = getContext(env, jthis, true);
-	if(context == NULL){
+	if(context == NULL || !context->isStreaming){
 		return;
 	}
 
 //	std::cout << "read: reading frame" << std::endl;
-	while(av_read_frame(context->formatContext, &(context->packet)) >= 0){
+	int read;
+	while((read = av_read_frame(context->formatContext, &(context->packet))) >= 0){
 //		std::cout << "read: recv packet" << std::endl;
 		if(context->packet.stream_index == context->videoStreamId){
 //			std::cout << "read: recv video packet" << std::endl;
@@ -319,21 +318,20 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_read(JNIEn
             				context->rgbFrame->data, context->rgbFrame->linesize);
 //				std::cout << "read: scaled image; freeing packet and breaking loop" << std::endl;
 
-				av_free_packet(&(context->packet));
 				break;
 			}
 		}
+	}
 
-		av_free_packet(&(context->packet));
+
+	if(read < 0){
+		std::cout << "read: read=" << read << std::endl;
+		context->isStreaming = false;
+		return;
 	}
 
 //	std::cout << "read: init final returning" << std::endl;
 //	std::cout << "read: beforeMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
-//	memcpy(context->dbbArray, context->rgbFrame->data[0], context->bufferSize);
-//    if(!did){
-//        context->rgbFrame->data[0] = (unsigned char*)context->dbbArray;
-//        did = true;
-//    }
     doCallback(env, callback);
 //	std::cout << "read: afterMemcpy dbbArray@" << &(context->dbbArray) << ";typeid=" << typeid(context->dbbArray).name() << ";bufferSize=" << context->bufferSize << std::endl;
 }
@@ -356,13 +354,13 @@ JNIEXPORT void JNICALL Java_ga_nurupeaches_imgmap_natives_NativeVideo_close(JNIE
 	av_free(context->rgbFrameBuffer);
 	av_free(context->rgbFrame);
 	av_free(context->rawFrame);
+
 	avcodec_close(context->codecContext);
+
 	avformat_close_input(&(context->formatContext));
-	av_free(context->codec);
+
 	av_free_packet(&(context->packet));
 	sws_freeContext(context->imgConvertContext);
-//	env->DeleteLocalRef(context->javaArray);
-	context->isStreaming = false;
 }
 
 #ifdef __cplusplus

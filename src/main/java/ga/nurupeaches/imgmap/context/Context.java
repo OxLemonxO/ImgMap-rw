@@ -1,10 +1,14 @@
 package ga.nurupeaches.imgmap.context;
 
+import ga.nurupeaches.imgmap.ImgMapPlugin;
+import org.bukkit.command.CommandSender;
+
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 // Basically, factories done wrong!
 public abstract class Context {
@@ -28,8 +32,6 @@ public abstract class Context {
 	public abstract void write(DataOutputStream stream) throws IOException;
 	public abstract void read(DataInputStream stream) throws IOException;
 
-	public abstract short getId();
-
 	public static Collection<Context> getContexts(){
 		return Collections.unmodifiableMap(CONTEXT_LOOKUP).values();
 	}
@@ -45,17 +47,14 @@ public abstract class Context {
 	}
 
 	public static void registerContext(Context context){
-		if(context instanceof ImageMultiMapContext){
-			for(short id : ((ImageMultiMapContext)context).getIds()){
+		if(context instanceof MultiMapContext){
+			for(short id : ((MultiMapContext)context).getIds()){
 				CONTEXT_LOOKUP.put(id, context);
 			}
-		} else if(context instanceof AnimatedMultiMapContext){
-			for(short id : ((AnimatedMultiMapContext)context).getIds()){
-				CONTEXT_LOOKUP.put(id, context);
-			}
+		} else if(context instanceof SingleMapContext){
+			CONTEXT_LOOKUP.put(((SingleMapContext)context).getId(), context);
 		} else {
-			CONTEXT_LOOKUP.put(context.getId(), context);
-			System.out.println("registered3 " + context);
+			ImgMapPlugin.logger().log(Level.WARNING, "Didn't know how to register " + context.toString() + "!");
 		}
 	}
 
@@ -63,6 +62,20 @@ public abstract class Context {
 
 		public void sendMessage(String message);
 
+	}
+
+	public static class SenderNotifiable implements Notifiable {
+
+		private final CommandSender sender;
+
+		public SenderNotifiable(CommandSender sender){
+			this.sender = sender;
+		}
+
+		@Override
+		public void sendMessage(String message) {
+			sender.sendMessage(message);
+		}
 	}
 
 }

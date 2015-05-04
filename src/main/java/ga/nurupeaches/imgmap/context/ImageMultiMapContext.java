@@ -91,11 +91,6 @@ public class ImageMultiMapContext extends Context implements MultiMapContext {
 	}
 
 	@Override
-	public short getId(){
-		return ids[0];
-	}
-
-	@Override
 	public void update(Object... params){
 		List<MapRenderer> renderers;
 		MapRenderer first;
