@@ -9,9 +9,9 @@ public class NativeCallbackHandler implements CallbackHandler {
 	private final Context context;
 	private final BufferedImage image;
 
-	public NativeCallbackHandler(BufferedImage image, Context context){
+	public NativeCallbackHandler(BufferedImage buffer, Context context){
 		this.context = context;
-		this.image = image;
+		this.image = buffer;
 	}
 
 	// Called by JNI

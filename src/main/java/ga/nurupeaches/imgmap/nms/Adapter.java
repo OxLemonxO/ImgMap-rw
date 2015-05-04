@@ -8,12 +8,15 @@ import org.bukkit.map.MapView;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class Adapter {
 
     private static final Color[] colors;
 	private static final Adapter IMPL;
-    private static final AdapterBuffer buffer = new AdapterBuffer();
+
+    private static final Map<Short, AdapterBuffer> BUFFER_MAP = new ConcurrentHashMap<Short, AdapterBuffer>();
 
     public static final boolean INJECTED;
 
@@ -43,15 +46,18 @@ public abstract class Adapter {
 	}
 
     public static MapPacket convertImageToPackets(short id, BufferedImage image){
-        synchronized(buffer){
-            image.getRGB(0, 0, 128, 128, buffer.rgbBuffer, 0, 128);
-
-            for(int i=0; i < buffer.dataBuffer.length; i++){
-                buffer.dataBuffer[i] = getColor(buffer.rgbBuffer[i]);
-            }
-
-            return generatePacket(id, buffer.dataBuffer); // setData will no-op if we're not injected.
+        AdapterBuffer buffer = BUFFER_MAP.get(id);
+        if(buffer == null){
+            buffer = new AdapterBuffer();
+            BUFFER_MAP.put(id, buffer);
         }
+
+        image.getRGB(0, 0, 128, 128, buffer.rgbBuffer, 0, 128);
+        for(int i=0; i < buffer.dataBuffer.length; i++){
+            buffer.dataBuffer[i] = getColor(buffer.rgbBuffer[i]);
+        }
+
+        return generatePacket(id, buffer.dataBuffer); // setData will no-op if we're not injected.
     }
 
     public static MapView generateMap(World world, short id){
