@@ -40,7 +40,7 @@ public class NativeVideo {
 	public void read(){
 		read(handler);
 	}
-s
+
 	public void open(String source) throws IOException {
 		int status = _open(source);
 		switch(status){
