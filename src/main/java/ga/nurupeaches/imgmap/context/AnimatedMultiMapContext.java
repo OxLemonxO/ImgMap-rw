@@ -146,9 +146,7 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 				}
 			}
 			tasks.clear();
-		} catch (InterruptedException e){
-			e.printStackTrace();
-		} catch (ExecutionException e){
+		} catch (InterruptedException | ExecutionException e){
 			e.printStackTrace();
 		}
 	}

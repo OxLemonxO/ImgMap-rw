@@ -34,7 +34,12 @@ public class ImgMapPlugin extends JavaPlugin {
 		getCommand("joinvideo").setExecutor(command);
 		loadContexts();
 
-		System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
+        String osName = System.getProperty("os.name");
+        if(osName.toLowerCase().contains("win")){
+            System.load(new File(getDataFolder(), "NativeVideo.dll").getAbsolutePath());
+        } else {
+            System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
+        }
 		NativeVideo.initialize(NativeCallbackHandler.class);
     }
 

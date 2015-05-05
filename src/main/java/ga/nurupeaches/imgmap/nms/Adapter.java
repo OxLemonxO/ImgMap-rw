@@ -10,13 +10,13 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 public abstract class Adapter {
 
     private static final Color[] colors;
 	private static final Adapter IMPL;
 
-    private static final Map<Short, AdapterBuffer> BUFFER_MAP = new ConcurrentHashMap<Short, AdapterBuffer>();
+    private static final Map<Integer, Byte> CACHE = new ConcurrentHashMap<>();
+    private static final Map<Short, AdapterBuffer> BUFFER_MAP = new ConcurrentHashMap<>();
 
     public static final boolean INJECTED;
 
@@ -32,13 +32,9 @@ public abstract class Adapter {
             colors = _stealColors();
 		} catch (ClassNotFoundException e){
 			throw new IllegalStateException("Failed to retrieve NMS adapter for version " + version);
-		} catch (InstantiationException e){
+		} catch (InstantiationException | IllegalAccessException | NoSuchFieldException e){
 			throw new RuntimeException(e);
-		} catch (IllegalAccessException e){
-			throw new RuntimeException(e);
-		} catch (NoSuchFieldException e){
-            throw new RuntimeException(e);
-        }
+		}
 	}
 
 	public static MapPacket generatePacket(short id, byte[] data){
@@ -81,19 +77,26 @@ public abstract class Adapter {
     }
 
     private static byte getColor(int rgb){
-        int index = 0;
-        double best = -1.0D;
-        double dist;
+        Byte ret = CACHE.get(rgb);
 
-        for(int i = 4; i < colors.length; ++i) {
-            dist = getDistance(rgb, colors[i]);
-            if(dist < best || best == -1.0D) {
-                best = dist;
-                index = i;
+        if(ret == null) {
+            int index = 0;
+            double best = -1.0D;
+            double dist;
+
+            for (int i = 4; i < colors.length; ++i) {
+                dist = getDistance(rgb, colors[i]);
+                if (dist < best || best == -1.0D) {
+                    best = dist;
+                    index = i;
+                }
             }
+
+            ret = (byte) (index < 128 ? index : -129 + (index - 127));
+            CACHE.put(rgb, ret);
         }
 
-        return (byte)(index < 128?index:-129 + (index - 127));
+        return ret;
     }
 
 	protected abstract MapPacket _generatePacket(short id, byte[] data);

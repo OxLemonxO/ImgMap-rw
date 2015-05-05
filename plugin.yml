@@ -1,5 +1,5 @@
 name: ImgMap
-version: 0-rw
+version: 1-rw
 main: ga.nurupeaches.imgmap.ImgMapPlugin
 
 commands:
