@@ -31,7 +31,8 @@ public class ImgMapPlugin extends JavaPlugin {
 		DrawCommand command = new DrawCommand();
 		getCommand("drawimage").setExecutor(command);
 		getCommand("drawvideo").setExecutor(command);
-		getCommand("joinvideo").setExecutor(command);
+        getCommand("joinvideo").setExecutor(command);
+        getCommand("drawdesktop").setExecutor(command);
 		loadContexts();
 
         String osName = System.getProperty("os.name");
@@ -106,7 +107,7 @@ public class ImgMapPlugin extends JavaPlugin {
 
 	public void saveContexts(){
 		File output = new File(this.getDataFolder(), "contexts");
-		HashSet<Context> contexts = new LinkedHashSet<Context>(Context.getContexts());
+		HashSet<Context> contexts = new LinkedHashSet<>(Context.getContexts());
 		// You may ask yourself: what the hell are you doing above?
 		// Duplicate MultiMapContexts exist when we call Context.getContexts().
 		// By definition, LinkedHashSet does not allow and will remove duplicates.
@@ -167,16 +168,15 @@ public class ImgMapPlugin extends JavaPlugin {
 		}
 	}
 
-
 	public void unloadJNI() throws Exception {
 		Field field = ClassLoader.class.getDeclaredField("nativeLibraries");
 		field.setAccessible(true);
 		Vector libs = (Vector)field.get(this.getClassLoader());
 		Method finalizeMethod;
 		for (Object o : libs) {
-			finalizeMethod = o.getClass().getDeclaredMethod("finalize", new Class[0]);
+			finalizeMethod = o.getClass().getDeclaredMethod("finalize");
 			finalizeMethod.setAccessible(true);
-			finalizeMethod.invoke(o, new Object[0]);
+			finalizeMethod.invoke(o);
 		}
 	}
 

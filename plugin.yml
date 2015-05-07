@@ -6,3 +6,4 @@ commands:
     drawimage:
     drawvideo:
     joinvideo:
+    drawdesktop:

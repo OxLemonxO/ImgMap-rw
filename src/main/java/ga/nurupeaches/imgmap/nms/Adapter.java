@@ -66,14 +66,16 @@ public abstract class Adapter {
         return (Color[])field.get(null);
     }
 
+
+    private static double rmean, r, g, b, weightR, weightB;
     private static double getDistance(int rgb, Color color){
-        double rmean = (double)(((rgb >> 16) & 0xFF) + color.getRed()) / 2.0D;
-        double r = (double)((rgb >> 16) & 0xFF) - color.getRed();
-        double g = (double)((rgb >> 8) & 0xFF) - color.getGreen();
-        int b = (rgb & 0xFF) - color.getBlue();
-        double weightR = 2.0D + rmean / 256.0D;
-        double weightB = 2.0D + (255.0D - rmean) / 256.0D;
-        return weightR * r * r + 4.0D * g * g + weightB * (double)b * (double)b;
+        rmean = (double)(((rgb >> 16) & 0xFF) + color.getRed()) / 2.0D;
+        r = (double)((rgb >> 16) & 0xFF) - color.getRed();
+        g = (double)((rgb >> 8) & 0xFF) - color.getGreen();
+        b = (rgb & 0xFF) - color.getBlue();
+        weightR = 2.0D + rmean / 256.0D;
+        weightB = 2.0D + (255.0D - rmean) / 256.0D;
+        return weightR * r * r + 4.0D * g * g + weightB * b * b;
     }
 
     private static byte getColor(int rgb){

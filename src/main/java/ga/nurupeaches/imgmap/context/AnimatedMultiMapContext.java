@@ -34,7 +34,7 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 		this.ids = ids;
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
-		this.tasks = new ArrayList<Callable<MapPacket>>(sizeX*sizeY);
+		this.tasks = new ArrayList<>(sizeX*sizeY);
 		System.out.println(Arrays.toString(ids) + ",x=" + sizeX + ",y=" + sizeY);
 	}
 

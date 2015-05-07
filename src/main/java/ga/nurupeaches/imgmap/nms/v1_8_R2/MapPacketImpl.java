@@ -46,7 +46,7 @@ public class MapPacketImpl implements MapPacket {
 		}
 
 //		System.out.println("sending packet " + toString());
-		((CraftPlayer)player).getHandle().playerConnection.networkManager.handle(packet);
+		((CraftPlayer)player).getHandle().playerConnection.networkManager.k.write(packet);
 	}
 	
 	public String toString(){

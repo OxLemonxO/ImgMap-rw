@@ -17,7 +17,7 @@ import java.util.logging.Level;
 public class AdapterImpl extends Adapter {
 
 	public static final int CACHE_SIZE = 50;
-	private Map<Short, MapPacket> cache = new HashMap<Short, MapPacket>(CACHE_SIZE);
+	private Map<Short, MapPacket> cache = new HashMap<>(CACHE_SIZE);
 
 	@Override
 	protected MapPacket _generatePacket(short id, byte[] data) {
@@ -65,7 +65,7 @@ public class AdapterImpl extends Adapter {
 		Field packets = EnumProtocol.class.getDeclaredField("j");
 		packets.setAccessible(true);
 		Map<EnumProtocolDirection, BiMap<Integer, Class<? extends Packet>>> pMap = (Map<EnumProtocolDirection, BiMap<Integer, Class<? extends Packet>>>)packets.get(protocol);
-		ProxyBiMap newPacketMap = new ProxyBiMap<Integer, Class<? extends Packet>>(pMap.get(EnumProtocolDirection.CLIENTBOUND));
+		ProxyBiMap<Integer, Class<? extends Packet>> newPacketMap = new ProxyBiMap<>(pMap.get(EnumProtocolDirection.CLIENTBOUND));
 		newPacketMap.addProxy(PacketPlayOutMap.class, PacketPlayOutMapNoLoop.class);
 		pMap.put(EnumProtocolDirection.CLIENTBOUND, newPacketMap);
 

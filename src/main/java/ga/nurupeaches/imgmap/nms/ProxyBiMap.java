@@ -18,7 +18,7 @@ public class ProxyBiMap<K, V> implements BiMap<K, V> {
 		proxy = HashBiMap.create();
 	}
 
-	public void addProxy(K target, K orig){
+	public void addProxy(Object target, Object orig){
 		proxy.put(target, orig);
 	}
 
