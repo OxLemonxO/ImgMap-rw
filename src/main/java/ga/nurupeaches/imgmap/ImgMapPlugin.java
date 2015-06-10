@@ -32,7 +32,7 @@ public class ImgMapPlugin extends JavaPlugin {
 		getCommand("drawimage").setExecutor(command);
 		getCommand("drawvideo").setExecutor(command);
         getCommand("joinvideo").setExecutor(command);
-        getCommand("drawdesktop").setExecutor(command);
+        getCommand("lolgameboy").setExecutor(command);
 		loadContexts();
 
         String osName = System.getProperty("os.name");
@@ -42,6 +42,7 @@ public class ImgMapPlugin extends JavaPlugin {
             System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
         }
 		NativeVideo.initialize(NativeCallbackHandler.class);
+//        EntityDPad.injectEntity();
     }
 
     @Override

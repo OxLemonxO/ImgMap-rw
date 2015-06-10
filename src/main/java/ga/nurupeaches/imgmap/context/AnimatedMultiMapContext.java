@@ -10,7 +10,6 @@ import org.bukkit.map.MapView;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -35,7 +34,7 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.tasks = new ArrayList<>(sizeX*sizeY);
-		System.out.println(Arrays.toString(ids) + ",x=" + sizeX + ",y=" + sizeY);
+//		System.out.println(Arrays.toString(ids) + ",x=" + sizeX + ",y=" + sizeY);
 	}
 
 	@Override
@@ -66,7 +65,7 @@ public class AnimatedMultiMapContext extends WatchableContext implements MultiMa
 		nativeThread = new Thread(new Runnable(){
 			@Override
 			public void run(){
-					// Guarantees that we execute this at LEAST once.
+				// Guarantees that we execute this at LEAST once.
 				try {
 					do {
 						video.read();

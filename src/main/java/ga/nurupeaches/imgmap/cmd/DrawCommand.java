@@ -112,9 +112,12 @@ public class DrawCommand implements CommandExecutor {
 				casted.updateContent(notifiable, targetURL, null);
 				casted.addViewer(((Player)sender).getUniqueId());
 				casted.startThreads();
-				Context.registerContext(casted);
+                Context.registerContext(casted);
 				return true;
-			}
+			} else if(command.getName().equalsIgnoreCase("lolgameboy")){
+//                GameBoyContext gbc = new GameBoyContext(targetId, ((Player)sender));
+//                Context.registerContext(gbc);
+            }
 
 			return false;
 		}

@@ -19,7 +19,7 @@ public class DrawVideoCommand extends CommandHandler {
 
 	@Override
 	public void executeCommand(CommandSender sender, String[] arguments){
-		final Player player = (Player)sender;
+        final Player player = (Player)sender;
 		ItemStack stack = player.getItemInHand();
 		if(stack == null || (stack.getType() != Material.MAP)){
 			commandFailure(sender, "You must be holding a map to use this command!");

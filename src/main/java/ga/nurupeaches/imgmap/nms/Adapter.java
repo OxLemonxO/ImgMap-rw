@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 public abstract class Adapter {
 
     private static final Color[] colors;
@@ -41,14 +42,19 @@ public abstract class Adapter {
         return IMPL._generatePacket(id, data);
 	}
 
-    public static MapPacket convertImageToPackets(short id, BufferedImage image){
+    public static AdapterBuffer getBuffer(short id){
         AdapterBuffer buffer = BUFFER_MAP.get(id);
         if(buffer == null){
             buffer = new AdapterBuffer();
             BUFFER_MAP.put(id, buffer);
         }
+        return buffer;
+    }
 
+    public static MapPacket convertImageToPackets(short id, BufferedImage image){
+        AdapterBuffer buffer = getBuffer(id);
         image.getRGB(0, 0, 128, 128, buffer.rgbBuffer, 0, 128);
+
         for(int i=0; i < buffer.dataBuffer.length; i++){
             buffer.dataBuffer[i] = getColor(buffer.rgbBuffer[i]);
         }

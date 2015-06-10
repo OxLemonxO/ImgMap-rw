@@ -30,13 +30,13 @@ public class DrawImageCommand extends CommandHandler {
 		}
 
 		BufferedImage image;
-		try {
-			image = IOHelper.fetchImage(new URL(arguments[0]));
-		} catch (IOException e){
-			commandFailure(sender, "Failed to retrieve image!");
-			e.printStackTrace();
-			return;
-		}
+        try {
+            image = IOHelper.fetchImage(new URL(arguments[0]));
+        } catch (IOException e){
+            commandFailure(sender, "Failed to retrieve image!");
+            e.printStackTrace();
+            return;
+        }
 
 		Context context = Context.getContext(stack.getDurability());
 		if(arguments.length > 1 && arguments[1].startsWith("-mm")){

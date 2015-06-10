@@ -1,10 +1,10 @@
-package ga.nurupeaches.imgmap.nms.v1_8_R2;
+package ga.nurupeaches.imgmap.nms.v1_8_R3;
 
 import ga.nurupeaches.imgmap.nms.Adapter;
 import ga.nurupeaches.imgmap.nms.MapPacket;
-import net.minecraft.server.v1_8_R2.MapIcon;
-import net.minecraft.server.v1_8_R2.PacketPlayOutMap;
-import org.bukkit.craftbukkit.v1_8_R2.entity.CraftPlayer;
+import net.minecraft.server.v1_8_R3.MapIcon;
+import net.minecraft.server.v1_8_R3.PacketPlayOutMap;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapView;
 
@@ -45,11 +45,11 @@ public class MapPacketImpl implements MapPacket {
 		}
 
 //		System.out.println("sending packet " + toString());
-		((CraftPlayer)player).getHandle().playerConnection.networkManager.k.writeAndFlush(packet);
+		((CraftPlayer)player).getHandle().playerConnection.networkManager.channel.writeAndFlush(packet);
 	}
 	
 	public String toString(){
-		return "MapPacketImpl(1.8_R2){id=" + id + ",packet="+packet+"}";
+		return "MapPacketImpl(1.8_R3){id=" + id + ",packet="+packet+"}";
 	}
 
 }

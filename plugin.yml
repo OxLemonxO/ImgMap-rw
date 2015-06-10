@@ -4,6 +4,10 @@ main: ga.nurupeaches.imgmap.ImgMapPlugin
 
 commands:
     drawimage:
+        permission: imgmap.command.drawimage
     drawvideo:
+        permission: imgmap.command.drawvideo
     joinvideo:
-    drawdesktop:
+        permission: imgmap.command.joinvideo
+    lolgameboy:
+        permission: imgmap.command.lolgameboy
