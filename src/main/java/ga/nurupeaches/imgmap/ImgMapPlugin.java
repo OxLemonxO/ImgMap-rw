@@ -39,7 +39,7 @@ public class ImgMapPlugin extends JavaPlugin {
         if(osName.toLowerCase().contains("win")){
             System.load(new File(getDataFolder(), "NativeVideo.dll").getAbsolutePath());
         } else {
-            System.load(new File(getDataFolder(), "libNativeVideo.so").getAbsolutePath());
+            System.load("/home/root/.ampdata/instances/MCMA/Minecraft/plugins/ImgMapC++/src/main/cplusplus/libNativeVideo.so");
         }
 		NativeVideo.initialize(NativeCallbackHandler.class);
 //        EntityDPad.injectEntity();
